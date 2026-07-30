@@ -6,7 +6,7 @@
   <a href="https://github.com/1337strike/horus/actions/workflows/ci.yml"><img src="https://github.com/1337strike/horus/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-1B3E73.svg" alt="Python 3.10+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-E3B23C.svg" alt="License: Apache 2.0"></a>
-  <img src="https://img.shields.io/badge/tests-65%20passing-2E8B6F.svg" alt="65 tests passing">
+  <img src="https://img.shields.io/badge/tests-69%20passing-2E8B6F.svg" alt="69 tests passing">
 </p>
 
 ---
@@ -32,6 +32,37 @@ Horus judges the action trace instead. See
 
 > ⚠️ **Authorised testing only.** This tool is for assessing systems you own or
 > have explicit written permission to test. See [RESPONSIBLE_USE.md](RESPONSIBLE_USE.md).
+
+## Project status — read this before trusting a number
+
+A tool whose entire thesis is honest uncertainty reporting has no business being
+vague about its own maturity.
+
+**What is validated.** The harness runs end to end and is covered by 69 tests,
+including the judge's resistance to being talked out of a verdict, taint-flow
+detection and its ordering, and the two silent-failure paths described below.
+Every number in this README was produced by the bundled mock targets.
+
+**What is not.** Horus has not yet been run in a real red-team engagement. The
+mock targets are simulations of *defenders* with weaknesses I planted myself, so
+the demo figures demonstrate that the pipeline works — they say nothing about
+any real model's security, and they are not evidence that the probe library is
+adequate for one. The judge calibration shipped here is an 8-item example,
+which the tool itself labels as an insufficient sample.
+
+**It is a harness, not an attack tool.** The bundled probes are a handful of
+low-potency, publicly-documented examples that exist to exercise every code
+path, and the mutator is an interface with a trivial demonstration behind it.
+Anyone expecting to point this at a system and get a finished assessment will be
+disappointed: you supply the threat model, the probe packs, the tool policy, and
+the labelled gold set. That boundary is deliberate — see
+[RESPONSIBLE_USE.md](RESPONSIBLE_USE.md) — but it is a real cost, not a footnote.
+
+**On the commit history.** This was published as a complete design rather than
+grown in public, so there is no incremental history to read. The reasoning that
+would normally live in commit messages is in the seven design decisions below,
+and in the tests, which are written to assert the arguments rather than just the
+behaviour.
 
 ---
 
@@ -434,7 +465,7 @@ pytest -q
 ```
 
 ```
-65 passed in 0.42s
+69 passed in 1.15s
 ```
 
 The suite covers judge injection-resistance, ensemble routing, kappa and Wilson
@@ -459,6 +490,15 @@ formats, and full end-to-end runs for both the text and agentic pipelines.
 - **A run is a snapshot, not a guarantee.** Zero failures across 8 repeats has a
   95% upper bound above 30%. The report shows that bound instead of implying
   proof of safety.
+- **Payload shapes drift, and that used to fail silently.** An HTTP target is
+  configured with a dotted `response_path`. When a provider changed its payload
+  shape, the old code read the missing field as an empty string, the judge found
+  nothing objectionable in it, and every probe scored a pass — a broken pipeline
+  reporting a flawless security posture. Unresolvable paths are now an explicit
+  ERROR, errored attempts are excluded from the denominators, and a category
+  where everything errored renders as "—" rather than 0%. Watch for the error
+  callout at the top of the report; it means the numbers below are thinner than
+  they appear.
 
 ## Prior art
 
@@ -474,19 +514,31 @@ The wedjat — the Eye of Horus — was an ancient Egyptian symbol of protection
 watchfulness, and it doubled as a system of measure. That pairing is the whole
 thesis of this project, so it seemed the right thing to put on the front.
 
-The eye and the wordmark are drawn with a single stroke weight, so the glyph and
-the lettering read as one hand. The palette is taken from the materials the
-original symbol was made from rather than from a default dark theme:
+The mark places Horus himself beside his eye: the standing falcon after the cult
+statues — conical crown, wesekh collar, folded wings, talons, plinth — drawn
+frontally and bilaterally symmetric, the way the temple figures are cut. The
+symmetry is doing double duty: it is how the originals were made, and it is what
+makes the figure verifiable, since every element can be checked against its own
+mirror rather than judged by eye.
+
+The palette is taken from the materials the original symbol was made from rather
+than from a default dark theme. The gold is a multi-stop gradient rather than a
+flat fill, since the banding is what makes gold look like metal:
 
 | | | |
 |---|---|---|
-| `#0F2440` | Lapis lazuli | ground |
-| `#E3B23C` | Electrum gold | ink |
-| `#EDE4D0` | Papyrus | body text |
-| `#7FA3CE` | Faience blue | secondary |
+| `#03060C` | Kohl | ground, at the edges |
+| `#102741` | Lapis lazuli | ground, where the mark sits |
+| `#C9962E` | Electrum gold | ink |
+| `#E8DFC8` | Papyrus | body text |
+| `#6B8FC4` | Faience blue | secondary |
 | `#B23528` | Carnelian | failure signal, used sparingly |
 
-Source is in [`docs/banner.svg`](docs/banner.svg) if you want to change it.
+Source is in [`docs/banner.svg`](docs/banner.svg) if you want to change it. Note
+the gradient uses `gradientUnits="userSpaceOnUse"`: an `objectBoundingBox`
+gradient silently fails to render on a perfectly straight path, because such a
+path has a zero-area bounding box. That one detail erased the `H` of the
+wordmark the first time.
 
 ## License
 

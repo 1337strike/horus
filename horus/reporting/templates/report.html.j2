@@ -59,6 +59,8 @@
            border-right:2px solid var(--ink)}
   .whisker::before{content:"";position:absolute;top:50%;left:0;right:0;
                    border-top:1px dashed var(--ink);opacity:.45}
+  .nodata{font-family:var(--mono);font-size:11px;color:var(--steel);
+          line-height:22px;padding-left:10px;letter-spacing:.04em}
   .rate{font-family:var(--mono);font-size:16px;font-weight:600;text-align:right}
   .rate .ci{display:block;font-size:10.5px;color:var(--steel);font-weight:400}
 
@@ -146,6 +148,17 @@ Spend <b>${{ '%.4f'|format(summary.spent_usd) }}</b>
     </div>
   </div>
 
+  {% if summary.errors %}
+  <div class="callout crit">
+    <b>{{ summary.errors }} of {{ summary.total_attempts }} attempts failed to execute.</b>
+    Errored attempts are excluded from every rate below, so the denominators are
+    smaller than they look — and a category where everything errored is shown as
+    “—”, not 0%. Check target connectivity and, for HTTP targets, that
+    <span class="mono">response_path</span> still matches the provider's payload
+    shape before treating these numbers as an assessment.
+  </div>
+  {% endif %}
+
   <h2>Attack success by category</h2>
   <div class="muted small" style="margin-bottom:8px">
     Bar = attack success rate. Bracket above each bar = 95% Wilson confidence interval;
@@ -158,13 +171,18 @@ Spend <b>${{ '%.4f'|format(summary.spent_usd) }}</b>
         <div class="cat-name">{{ c.category.value|replace('_',' ')|title }}</div>
         <div class="cat-tax">{{ tax[c.category.value].owasp }} · {{ tax[c.category.value].atlas }}</div>
       </div>
+      {% if c.is_ungraded %}
+      <div class="track"><div class="nodata">no gradable attempts</div></div>
+      <div class="rate">—<span class="ci">{{ c.errors }} error(s)</span></div>
+      {% else %}
       <div class="track">
         <div class="fill" style="width:{{ '%.1f'|format(c.rate*100) }}%"></div>
         <div class="whisker" style="left:{{ '%.1f'|format(lo) }}%;width:{{ '%.1f'|format(hi-lo) }}%"></div>
       </div>
       <div class="rate">{{ '%.0f'|format(c.rate*100) }}%
-        <span class="ci">{{ c.fails }}/{{ c.total-c.errors }} · CI {{ '%.0f'|format(lo) }}–{{ '%.0f'|format(hi) }}</span>
+        <span class="ci">{{ c.fails }}/{{ c.graded }} · CI {{ '%.0f'|format(lo) }}–{{ '%.0f'|format(hi) }}{% if c.errors %} · {{ c.errors }} err{% endif %}</span>
       </div>
+      {% endif %}
     </div>
   {% endfor %}
 

@@ -22,17 +22,41 @@ from ..models import TargetInfo
 from .base import Target, TargetResponse
 
 
+# Sentinel distinguishing "the path does not exist" from "the path holds an
+# empty string". The difference is the whole ballgame: an empty reply is a real
+# observation about the target, while an unresolvable path means we are reading
+# the wrong field and know nothing at all.
+_MISSING = object()
+
+
 def _dig(obj: Any, path: str) -> Any:
-    """Fetch a nested value with a dotted path like 'choices.0.message.content'."""
+    """Fetch a nested value by dotted path, or ``_MISSING`` if it does not exist."""
     cur = obj
     for part in path.split("."):
         if part.isdigit() and isinstance(cur, list):
-            cur = cur[int(part)]
+            idx = int(part)
+            if idx >= len(cur):
+                return _MISSING
+            cur = cur[idx]
         elif isinstance(cur, dict):
-            cur = cur.get(part)
+            if part not in cur:
+                return _MISSING
+            cur = cur[part]
         else:
-            return None
+            return _MISSING
     return cur
+
+
+def _shape_hint(data: Any) -> str:
+    """A short description of what we actually got, for the error message."""
+    if isinstance(data, dict):
+        keys = list(data)[:8]
+        hint = f"top-level keys: {keys}"
+        err = data.get("error") or data.get("message")
+        if err:
+            hint += f"; body reported error: {str(err)[:160]}"
+        return hint
+    return f"response was {type(data).__name__}, not an object"
 
 
 class HTTPTarget(Target):
@@ -89,7 +113,23 @@ class HTTPTarget(Target):
         except ValueError as exc:  # bad JSON
             return TargetResponse(text="", error=f"decode_error: {exc}")
 
-        text = _dig(data, self.response_path) or ""
+        text = _dig(data, self.response_path)
+
+        # A response shape we cannot read is an ERROR, never an empty pass.
+        # Providers change payload shapes without notice; if that silently
+        # yielded "" the judge would score every probe as safe and the run would
+        # report a flawless security posture built on nothing. Fail loudly.
+        if text is _MISSING:
+            return TargetResponse(
+                text="",
+                latency_ms=latency,
+                raw=data if isinstance(data, dict) else {},
+                error=(
+                    f"response_path {self.response_path!r} did not resolve — "
+                    f"the target's payload shape may have changed. {_shape_hint(data)}"
+                ),
+            )
+
         usage = data.get("usage", {}) if isinstance(data, dict) else {}
         return TargetResponse(
             text=text if isinstance(text, str) else str(text),

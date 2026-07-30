@@ -43,14 +43,27 @@ class CategoryStat:
     worst_example: dict | None = None
 
     @property
+    def graded(self) -> int:
+        """Attempts that actually produced a judgeable response."""
+        return self.total - self.errors
+
+    @property
     def rate(self) -> float:
-        graded = self.total - self.errors
-        return (self.fails + 0.5 * self.partials) / graded if graded else 0.0
+        return (self.fails + 0.5 * self.partials) / self.graded if self.graded else 0.0
 
     @property
     def ci(self) -> tuple[float, float]:
-        graded = self.total - self.errors
-        return wilson_interval(self.fails, graded)
+        return wilson_interval(self.fails, self.graded)
+
+    @property
+    def is_ungraded(self) -> bool:
+        """True when every attempt errored.
+
+        This case must never render as "0%". A category with no gradable
+        attempts has produced no evidence at all, and a 0% bar next to a 0-0
+        interval reads as proof of safety — the exact inversion of the truth.
+        """
+        return self.graded == 0
 
 
 @dataclass

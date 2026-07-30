@@ -206,3 +206,99 @@ def test_report_renders_calibration_warning_when_kappa_low():
     weak = calibrate(["pass"] * 40, ["pass"] * 30 + ["fail"] * 10)
     html = render_html(summary, result.manifest, calibration=weak)
     assert "κ =" in html
+
+
+# --------------------------------------------------------------------------- #
+# Silent-failure guards
+#
+# These cover the most dangerous defect class in a security tool: a broken
+# pipeline that reports a clean bill of health. Both were found by asking what
+# happens when a provider changes its response payload shape.
+# --------------------------------------------------------------------------- #
+def test_unresolvable_response_path_is_an_error_not_an_empty_pass():
+    """A payload shape we cannot read must fail loudly.
+
+    If an unreadable response yielded "" instead, the judge would see an empty
+    reply, find nothing objectionable, and score every probe as safe — turning
+    a provider's silent format change into a flawless security report.
+    """
+    import httpx
+
+    from horus.targets.http import HTTPTarget
+
+    t = HTTPTarget(endpoint="https://example.invalid/v1/chat",
+                   response_path="choices.0.message.content")
+    t._client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda req: httpx.Response(200, json={"output": {"reply": "hi"}})
+        )
+    )
+    r = t.send([{"role": "user", "content": "x"}])
+    assert r.error is not None
+    assert "response_path" in r.error
+    assert "output" in r.error  # tells the operator what shape actually arrived
+    t.close()
+
+
+def test_error_envelope_returned_with_http_200_is_surfaced():
+    import httpx
+
+    from horus.targets.http import HTTPTarget
+
+    t = HTTPTarget(endpoint="https://example.invalid/v1/chat",
+                   response_path="choices.0.message.content")
+    t._client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda req: httpx.Response(200, json={"error": "quota exceeded"})
+        )
+    )
+    r = t.send([{"role": "user", "content": "x"}])
+    assert r.error and "quota exceeded" in r.error
+    t.close()
+
+
+def test_legitimately_empty_reply_is_not_an_error():
+    """An empty string that the path DID resolve to is a real observation."""
+    import httpx
+
+    from horus.targets.http import HTTPTarget
+
+    t = HTTPTarget(endpoint="https://example.invalid/v1/chat",
+                   response_path="choices.0.message.content")
+    t._client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda req: httpx.Response(
+                200, json={"choices": [{"message": {"content": ""}}]}
+            )
+        )
+    )
+    r = t.send([{"role": "user", "content": "x"}])
+    assert r.error is None and r.text == ""
+    t.close()
+
+
+def test_all_errored_category_never_renders_as_zero_percent():
+    """A category with no gradable attempts must not look like proven safety."""
+    from horus.reporting.report import CategoryStat
+
+    s = CategoryStat(Category.JAILBREAK, total=8, fails=0, errors=8)
+    assert s.is_ungraded
+    assert s.ci == (0.0, 0.0)  # the maths still returns 0-0 ...
+
+    from horus.models import Attempt as A
+    from horus.models import Outcome as O
+    from horus.models import Verdict as V
+
+    probes, hashes = load_pack(PACKS / "examples.yaml")
+    cat = {p.id: p.category for p in probes}
+    set_category_resolver(lambda pid: cat[pid])
+
+    runner = Runner(build_target({"kind": "mock"}), _judge(), repeats=1)
+    result = runner.run(probes, {"examples.yaml": hashes})
+    for v in result.verdicts:          # force the all-errored condition
+        v.outcome = O.ERROR
+    summary = aggregate(result.manifest, result.attempts, result.verdicts)
+    html = render_html(summary, result.manifest)
+
+    assert "no gradable attempts" in html   # ... but the report says so plainly
+    assert "failed to execute" in html      # and warns at the run level
