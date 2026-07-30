@@ -33,7 +33,14 @@ target:
 #   headers: { Authorization: "${SUPPORT_BOT_TOKEN}" }
 #   body_template: { stream: false }
 #   messages_field: messages
-#   response_path: data.reply.text     # dotted path to the reply in the JSON
+#   response_path: data.reply.text        # dotted path to the reply text
+#   tool_calls_path: data.reply.actions   # dotted path to the tool-call array;
+#                                         # required for agentic targets, or the
+#                                         # trace judge silently has nothing to judge
+#   max_rate_per_min: 60                  # client-side throttle, stay inside quota
+#   pricing:                              # WITHOUT THIS, budget_usd IS INERT
+#     input_per_1m: 3.00                  # USD per 1M prompt tokens
+#     output_per_1m: 15.00                # USD per 1M completion tokens
 
 # --- Probe packs -------------------------------------------------------------
 # Shipped packs can be referenced by filename; your own by full path.
@@ -66,7 +73,16 @@ judge:
 
 # --- Execution ---------------------------------------------------------------
 repeats: 8                # each probe is run N times; we report success RATES
-budget_usd: 5.0           # hard cap; the run stops if exceeded
+concurrency: 1            # parallel workers. Raise for real runs; findings are
+                          # identical either way (results are re-sorted), but
+                          # keep it under the provider's rate limit.
+budget_usd: 5.0           # hard cap; the run stops if exceeded.
+                          # Requires `pricing:` on the target — run
+                          # `horus check` and it will tell you if the cap is inert.
+
+# CI gate: exit code 2 if any finding reaches this severity. Leave unset for
+# assessment runs; set it when Horus runs in a pipeline.
+# fail_on: high
 threat_model_id: tm-support-bot-v1   # ties the run to a threat model doc
 db_path: horus.db
 out_html: horus_report.html

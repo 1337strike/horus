@@ -6,7 +6,7 @@
   <a href="https://github.com/1337strike/horus/actions/workflows/ci.yml"><img src="https://github.com/1337strike/horus/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-1B3E73.svg" alt="Python 3.10+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-E3B23C.svg" alt="License: Apache 2.0"></a>
-  <img src="https://img.shields.io/badge/tests-69%20passing-2E8B6F.svg" alt="69 tests passing">
+  <img src="https://img.shields.io/badge/tests-88%20passing-2E8B6F.svg" alt="88 tests passing">
 </p>
 
 ---
@@ -38,10 +38,12 @@ Horus judges the action trace instead. See
 A tool whose entire thesis is honest uncertainty reporting has no business being
 vague about its own maturity.
 
-**What is validated.** The harness runs end to end and is covered by 69 tests,
+**What is validated.** The harness runs end to end and is covered by 88 tests,
 including the judge's resistance to being talked out of a verdict, taint-flow
-detection and its ordering, and the two silent-failure paths described below.
-Every number in this README was produced by the bundled mock targets.
+detection and its ordering, that concurrency does not change findings, that a
+crashed run resumes without repeating paid work, and the silent-failure paths
+described below. Every number in this README was produced by the bundled mock
+targets.
 
 **What is not.** Horus has not yet been run in a real red-team engagement. The
 mock targets are simulations of *defenders* with weaknesses I planted myself, so
@@ -57,6 +59,14 @@ Anyone expecting to point this at a system and get a finished assessment will be
 disappointed: you supply the threat model, the probe packs, the tool policy, and
 the labelled gold set. That boundary is deliberate — see
 [RESPONSIBLE_USE.md](RESPONSIBLE_USE.md) — but it is a real cost, not a footnote.
+
+**On "enterprise-ready".** The operational machinery is there — concurrency,
+checkpoint and resume, a budget cap that can actually fire, throttle handling,
+an audit trail, SARIF export, and a preflight check. What is *not* there is
+mileage. Every one of those paths is exercised by tests and by the mock
+targets, and none of them has met a real provider's rate limiter, auth refresh,
+streaming response, or 3 a.m. outage. Treat this as a well-built tool that has
+never been in the field, because that is what it is.
 
 **On the commit history.** This was published as a complete design rather than
 grown in public, so there is no incremental history to read. The reasoning that
@@ -339,10 +349,12 @@ borrows it. An agent that only filters user input is defenceless here.
 | `horus/targets/` | Connector ABC; mock, generic HTTP, OpenAI-compatible |
 | `horus/probes/` | YAML pack loader with content hashing and duplicate-ID detection |
 | `horus/agentic/` | Tool policy, action-trace analysis, taint tracking |
+| `horus/pricing.py` | Declared per-target pricing so the budget cap can fire |
+| `horus/export.py` | SARIF 2.1.0 and JSON export, with secrets redacted |
 | `horus/evaluator/` | Trace, deterministic, LLM, and ensemble judges |
-| `horus/orchestrator/` | N-repeat runner, budget cap, backoff; optional mutator |
+| `horus/orchestrator/` | Concurrent runner, checkpoint/resume, budget cap, throttle handling |
 | `horus/calibration/` | Gold sets, Cohen's kappa, precision/recall |
-| `horus/storage/` | SQLite persistence for audit and regression |
+| `horus/storage/` | SQLite persistence, checkpointing, resume, audit trail |
 | `horus/reporting/` | Aggregation with Wilson intervals; HTML report |
 
 ---
@@ -407,6 +419,75 @@ upstream is target-agnostic.
 
 ---
 
+## Operating it
+
+**Preflight before you spend anything.** The expensive failure is not a crash,
+it is a run that completes and reports a clean bill of health because every
+response was unreadable. One call answers that:
+
+```bash
+horus check --config config/my.config.yaml
+```
+
+```
+── Preflight ─────────────────────────────────────
+  packs         OK    6 probes from 2 pack(s)
+  tool policy   OK    5 tool(s) declared
+  connectivity  OK    412ms
+  response_path OK    resolved, 284 chars
+  tool_calls    WARN  none surfaced on a trivial prompt. If this target is an
+                      agent, confirm tool_calls_path matches its payload, or
+                      trace judging will silently have nothing to judge.
+  budget cap    WARN  INERT — no pricing declared, so budget_usd=5.0 can never
+                      trigger. Add a `pricing:` block.
+  judge         WARN  same model as the target — shared blind spots will be
+                      invisible to this assessment
+──────────────────────────────────────────────────
+```
+
+Every one of those warnings describes a way a run can look successful while
+telling you nothing.
+
+**Run it in parallel, resume it when it dies.** Attempts are checkpointed as
+they complete, so a run that fails at hour five continues instead of starting
+over:
+
+```bash
+horus run --config config/my.config.yaml --concurrency 8
+horus run --config config/my.config.yaml --resume 9000cdb582dc
+```
+
+Concurrency changes the schedule, never the findings — results are re-sorted
+into probe order before anything downstream sees them, and there is a test
+asserting a parallel run and a sequential one produce identical output.
+
+**Gate a pipeline on it.** `--fail-on` exits 2 when a finding reaches the given
+severity, so Horus can sit in CI next to the rest of your checks:
+
+```bash
+horus run --config config/ci.config.yaml --fail-on high
+horus export --config config/ci.config.yaml --run-id RUN --format sarif --out horus.sarif
+```
+
+SARIF 2.1.0 is what GitHub code scanning and most SAST dashboards already
+ingest, and the rules carry the OWASP and ATLAS identifiers so findings land in
+the same taxonomy as the rest of the security programme.
+
+**Exports are redacted.** Canary tokens are secrets planted in the target's
+configuration. If one reached a CI artifact store the canary would be burned and
+every future run using it worthless — and the client's real secret would now
+live somewhere with weaker access control than the system it came from. The
+exporter replaces canary values with a placeholder; the finding still says a
+canary leaked and which probe caught it, which is the security fact. The secret
+stays out of the pipeline.
+
+**Who ran what.** Every run writes start and finish records to an audit table
+with the operating-system user, host, target and spend. Findings about someone
+else's system are sensitive enough that "which of us produced this report" needs
+an answer.
+
+---
+
 ## Writing probe packs
 
 Horus ships a **small, deliberately low-potency** set of publicly-documented
@@ -465,7 +546,7 @@ pytest -q
 ```
 
 ```
-69 passed in 1.15s
+88 passed in 1.19s
 ```
 
 The suite covers judge injection-resistance, ensemble routing, kappa and Wilson

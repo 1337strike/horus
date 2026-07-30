@@ -10,5 +10,9 @@ venv/
 # Run artifacts hold adversarial content AND findings about a real system —
 # often someone else's. Never commit them. See RESPONSIBLE_USE.md.
 *.db
+*.db-wal
+*.db-shm
 *report.html
+*.sarif
+findings.json
 *.local.yaml

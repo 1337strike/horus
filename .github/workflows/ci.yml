@@ -20,5 +20,47 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Test
         run: pytest -q
-      - name: Smoke-test the offline demo
-        run: horus demo
+      - name: Smoke-test the offline demos
+        run: |
+          horus demo
+          horus demo-agent
+
+  # Demonstrates the pipeline shape Horus is meant to sit in: preflight, run
+  # with a severity gate, then publish findings as SARIF. It runs against the
+  # built-in mock, so it needs no credentials and costs nothing.
+  security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e .
+      - name: Preflight
+        run: horus check --config config/ci.config.yaml
+      - name: Run assessment
+        id: scan
+        continue-on-error: true          # publish findings even when the gate trips
+        run: horus run --config config/ci.config.yaml --fail-on critical
+      - name: Export SARIF
+        run: |
+          RUN_ID=$(python -c "import sqlite3;print(sqlite3.connect('ci.db').execute('SELECT run_id FROM runs ORDER BY started_at DESC LIMIT 1').fetchone()[0])")
+          horus export --config config/ci.config.yaml --run-id "$RUN_ID" \
+            --format sarif --out horus.sarif
+      - name: Upload SARIF
+        # Non-blocking: publishing to the Security tab depends on code scanning
+        # being enabled for the repo. If it is not, the demonstration of the
+        # pipeline shape still succeeds and only this step is skipped.
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: horus.sarif
+          category: horus
+      - name: Enforce the gate
+        if: steps.scan.outcome == 'failure'
+        run: |
+          echo "::error::Horus found findings at or above the configured severity"
+          exit 1

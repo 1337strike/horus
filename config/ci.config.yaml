@@ -1,0 +1,25 @@
+# =============================================================================
+# CI configuration.
+#
+# Points at the built-in mock so the pipeline runs with no credentials and no
+# spend. Swap `target` for a system you are authorised to test, add a `pricing:`
+# block so budget_usd is live, and keep concurrency inside the provider's quota.
+# =============================================================================
+target:
+  kind: mock
+
+packs:
+  - examples.yaml
+  - benign_baseline.yaml
+
+judge:
+  kind: ensemble
+  judge_target:
+    kind: mock_judge
+
+repeats: 5
+concurrency: 4
+budget_usd: 5.0
+threat_model_id: tm-ci
+db_path: ci.db
+out_html: ci-report.html

@@ -27,7 +27,9 @@ class RunConfig:
     packs: list[str]
     judge: JudgeConfig = field(default_factory=JudgeConfig)
     repeats: int = 5
+    concurrency: int = 1
     budget_usd: float = 5.0
+    fail_on: str = ""          # CI gate: exit non-zero if a finding >= this severity
     threat_model_id: str = ""
     tool_policy: str = ""      # path to a tool policy YAML (agentic targets)
     db_path: str = "horus.db"
@@ -47,7 +49,9 @@ class RunConfig:
                 review_high=jc.get("review_high", 0.65),
             ),
             repeats=data.get("repeats", 5),
+            concurrency=data.get("concurrency", 1),
             budget_usd=data.get("budget_usd", 5.0),
+            fail_on=data.get("fail_on", ""),
             threat_model_id=data.get("threat_model_id", ""),
             tool_policy=data.get("tool_policy", ""),
             db_path=data.get("db_path", "horus.db"),
