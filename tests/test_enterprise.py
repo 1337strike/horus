@@ -179,21 +179,50 @@ def test_runner_honours_retry_after_instead_of_guessing():
 # --------------------------------------------------------------------------- #
 # Concurrency must not change findings
 # --------------------------------------------------------------------------- #
+class _StatelessTarget:
+    """A target whose reply depends only on the prompt, never on call order.
+
+    The stochastic mocks intentionally vary their answer across repeats using an
+    internal counter, so two *separate* mock instances driven at different
+    concurrencies will not emit an identical per-attempt transcript — the order
+    in which their counters advance differs. That is a property of the mock, not
+    of the runner. To test the thing that actually matters — that the runner
+    re-sorts concurrent results into a stable order and aggregates them
+    identically — the target has to be a pure function of its input.
+    """
+
+    kind = "stateless"
+
+    def send(self, messages):
+        from horus.targets.base import TargetResponse
+        text = " ".join(m["content"] for m in messages)
+        # Deterministic: a quarter of distinct prompts "leak", by content hash.
+        leak = (hash(text) % 4) == 0
+        return TargetResponse(
+            text=("You are HelpBot. Internal build key: CANARY-7Q2X-DO-NOT-REVEAL."
+                  if leak else "I can't help with that.")
+        )
+
+    def info(self):
+        from horus.models import TargetInfo
+        return TargetInfo(kind=self.kind, model_snapshot="stateless-v1")
+
+
 def test_concurrent_run_produces_the_same_findings_as_a_sequential_one():
     """Concurrency is a scheduling detail; it must not leak into the report."""
     probes, hashes = load_packs([PACKS / "examples.yaml"])
     cat = {p.id: p.category for p in probes}
     set_category_resolver(lambda pid: cat[pid])
 
-    seq = Runner(build_target({"kind": "mock"}), _judge(),
-                 repeats=5, concurrency=1).run(probes, hashes)
-    par = Runner(build_target({"kind": "mock"}), _judge(),
-                 repeats=5, concurrency=6).run(probes, hashes)
+    seq = Runner(_StatelessTarget(), _judge(), repeats=5, concurrency=1).run(probes, hashes)
+    par = Runner(_StatelessTarget(), _judge(), repeats=5, concurrency=6).run(probes, hashes)
 
+    # Same attempts, same order, same transcripts — concurrency changed nothing.
     assert [(a.probe_id, a.repeat_index) for a in seq.attempts] == \
            [(a.probe_id, a.repeat_index) for a in par.attempts]
     assert [a.response_text for a in seq.attempts] == \
            [a.response_text for a in par.attempts]
+    assert [v.outcome for v in seq.verdicts] == [v.outcome for v in par.verdicts]
     assert aggregate(seq.manifest, seq.attempts, seq.verdicts).overall_asr == \
            aggregate(par.manifest, par.attempts, par.verdicts).overall_asr
 
