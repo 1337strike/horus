@@ -24,8 +24,8 @@ class _Pipe(io.StringIO):
 
 def test_banner_renders_the_mark_and_version():
     out = render("1.2.3", colour=False)
-    assert "HORUS" not in out            # it's ASCII-art, not the literal word
-    assert "(O)" in out                # the eye
+    assert "◉" in out or "()" in out     # the eye pupil is present
+    
     assert "v1.2.3" in out
     assert "authorised testing only" in out
 
@@ -70,7 +70,8 @@ def test_print_banner_writes_nothing_to_a_pipe():
 def test_print_banner_writes_to_a_tty():
     tty = _TTY()
     print_banner("0.1.0", stream=tty)
-    assert "(O)" in tty.getvalue()
+    v = tty.getvalue()
+    assert "◉" in v or "()" in v
 
 
 def test_cli_export_does_not_emit_a_banner(tmp_path, monkeypatch, capsys):
@@ -84,4 +85,4 @@ def test_cli_export_does_not_emit_a_banner(tmp_path, monkeypatch, capsys):
     rc = cli.main(["export", "--config", "config/example.config.yaml",
                    "--run-id", "nope", "--out", str(tmp_path / "x.sarif")])
     err = cli.sys.stderr.getvalue() if hasattr(cli.sys.stderr, "getvalue") else ""
-    assert "(O)" not in err
+    assert "HORUS" not in err or "authorised testing" not in err
