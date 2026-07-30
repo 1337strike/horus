@@ -1,101 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-label="Horus — a calibrated red-team harness for LLM applications">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="Horus — a calibrated red-team harness for LLM applications">
   <defs>
-    <radialGradient id="ground" cx="0.3" cy="0.5" r="0.8">
+    <radialGradient id="ground" cx="0.28" cy="0.5" r="0.8">
       <stop offset="0%"   stop-color="#102741"/>
       <stop offset="45%"  stop-color="#081426"/>
       <stop offset="100%" stop-color="#03060C"/>
     </radialGradient>
 
+    <!-- A faint pool of light behind the mark. Depth, not decoration: it is
+         what stops a flat dark field reading as merely empty. -->
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%"   stop-color="#E8C46A" stop-opacity="0.13"/>
+      <stop offset="60%"  stop-color="#C9962E" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#C9962E" stop-opacity="0"/>
+    </radialGradient>
+
     <!-- Polished metal, not flat yellow: the banding is what reads as gold.
          userSpaceOnUse is mandatory — an objectBoundingBox gradient silently
          fails to render on any perfectly straight path (zero-area bbox). -->
-    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="20" x2="0" y2="450">
-      <stop offset="0%"   stop-color="#A87A28"/>
-      <stop offset="24%"  stop-color="#F2D98A"/>
-      <stop offset="46%"  stop-color="#C9962E"/>
-      <stop offset="70%"  stop-color="#FFF3C8"/>
-      <stop offset="100%" stop-color="#9A7024"/>
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="60" x2="0" y2="340">
+      <stop offset="0%"   stop-color="#9A7024"/>
+      <stop offset="22%"  stop-color="#F2D98A"/>
+      <stop offset="45%"  stop-color="#C9962E"/>
+      <stop offset="72%"  stop-color="#FFF3C8"/>
+      <stop offset="100%" stop-color="#8E661F"/>
     </linearGradient>
 
     <linearGradient id="goldFaint" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1200" y2="0">
-      <stop offset="0%"   stop-color="#C9962E" stop-opacity="0.10"/>
-      <stop offset="50%"  stop-color="#F2D98A" stop-opacity="0.40"/>
-      <stop offset="100%" stop-color="#C9962E" stop-opacity="0.10"/>
+      <stop offset="0%"   stop-color="#C9962E" stop-opacity="0.08"/>
+      <stop offset="50%"  stop-color="#F2D98A" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#C9962E" stop-opacity="0.08"/>
     </linearGradient>
   </defs>
 
-  <rect width="1200" height="470" fill="url(#ground)"/>
-  <rect x="16" y="16" width="1168" height="438" fill="none"
-        stroke="url(#goldFaint)" stroke-width="1.2"/>
-  <rect x="22" y="22" width="1156" height="426" fill="none"
-        stroke="url(#goldFaint)" stroke-width="0.5" opacity="0.6"/>
+  <rect width="1200" height="400" fill="url(#ground)"/>
+  <circle cx="290" cy="200" r="250" fill="url(#halo)"/>
 
-  <!-- ============ HORUS as the standing falcon, after the cult statues ============
-       Frontal and bilaterally symmetric, the way the temple figures are cut.
-       Symmetry is also why this pose is trustworthy to draw: every element can be
-       checked against its own mirror image rather than judged by eye. -->
-  <g transform="translate(68,40) scale(0.94)" fill="none" stroke="url(#gold)"
+  <!-- Double hairline. Restraint is the luxury cue; precision, not ornament. -->
+  <rect x="16" y="16" width="1168" height="368" fill="none"
+        stroke="url(#goldFaint)" stroke-width="1.2"/>
+  <rect x="22" y="22" width="1156" height="356" fill="none"
+        stroke="url(#goldFaint)" stroke-width="0.5" opacity="0.55"/>
+
+  <!-- ===================== The wedjat =====================
+       Two weights, deliberately: the contour carries the form, the finer
+       marks carry the detail. A single weight is clean; a considered
+       hierarchy is refined. -->
+  <g transform="translate(126,69) scale(1.32)" fill="none" stroke="url(#gold)"
      stroke-linecap="round" stroke-linejoin="round">
 
-    <!-- Crown: tall conical hedjet with its finial. -->
-    <circle cx="95" cy="10" r="6" fill="url(#gold)" stroke="none"/>
-    <path d="M74,96 C70,54 78,24 95,18 C112,24 120,54 116,96" stroke-width="9"/>
-    <path d="M66,98 L124,98" stroke-width="9"/>
+    <!-- brow -->
+    <path d="M26,40 C70,6 150,2 196,26" stroke-width="12.5"/>
+    <!-- fine line paralleling the brow: the incised band of Egyptian relief -->
+    <path d="M36,54 C74,26 144,22 186,42" stroke-width="3.4" opacity="0.7"/>
 
-    <!-- Skull. -->
-    <path d="M67,100 C65,138 78,163 95,167 C112,163 125,138 123,100" stroke-width="10"/>
+    <!-- eye -->
+    <path d="M14,86 C56,44 148,42 200,72 C150,112 58,116 14,86 Z" stroke-width="12.5"/>
+    <circle cx="108" cy="78" r="19" fill="url(#gold)" stroke="none"/>
+    <!-- upper lid accent -->
+    <path d="M40,80 C70,58 130,56 172,70" stroke-width="3" opacity="0.5"/>
 
-    <!-- Eyes and brow. -->
-    <circle cx="81" cy="120" r="7" fill="url(#gold)" stroke="none"/>
-    <circle cx="109" cy="120" r="7" fill="url(#gold)" stroke="none"/>
-    <path d="M72,110 C76,105 86,105 90,109" stroke-width="4" opacity="0.9"/>
-    <path d="M118,110 C114,105 104,105 100,109" stroke-width="4" opacity="0.9"/>
-
-    <!-- Beak: short, deep, hooked — the raptor tell. -->
-    <path d="M87,134 C90,152 100,152 103,134" stroke-width="7"/>
-    <path d="M95,150 C95,158 93,162 90,163" stroke-width="6"/>
-
-    <!-- Wesekh, the broad collar. -->
-    <path d="M54,176 Q95,216 136,176" stroke-width="9"/>
-    <path d="M49,187 Q95,232 141,187" stroke-width="7"/>
-    <path d="M44,198 Q95,248 146,198" stroke-width="5.5"/>
-
-    <!-- Folded wings against the body. -->
-    <path d="M48,196 C34,240 36,296 50,332" stroke-width="10"/>
-    <path d="M142,196 C156,240 154,296 140,332" stroke-width="10"/>
-
-    <!-- Feather courses. Each row is exactly centred on the axis; a one-pixel
-         drift here is invisible alone but breaks the mirror test. -->
-    <path d="M51,252 q11,15 22,0 q11,15 22,0 q11,15 22,0 q11,15 22,0" stroke-width="5"/>
-    <path d="M51,282 q11,15 22,0 q11,15 22,0 q11,15 22,0 q11,15 22,0" stroke-width="5"/>
-    <path d="M51,312 q11,15 22,0 q11,15 22,0 q11,15 22,0 q11,15 22,0" stroke-width="5"/>
-
-    <!-- Tail. -->
-    <path d="M50,332 L58,378 L132,378 L140,332" stroke-width="9"/>
-    <path d="M79,342 L81,376" stroke-width="4"/>
-    <path d="M95,342 L95,376" stroke-width="4"/>
-    <path d="M111,342 L109,376" stroke-width="4"/>
-
-    <!-- Legs, talons, plinth. -->
-    <path d="M76,378 L74,396" stroke-width="7"/>
-    <path d="M114,378 L116,396" stroke-width="7"/>
-    <path d="M62,398 L88,398" stroke-width="6"/>
-    <path d="M102,398 L128,398" stroke-width="6"/>
-    <path d="M40,410 L150,410" stroke-width="6"/>
+    <!-- malar stripe and spiral tail -->
+    <path d="M84,106 L66,168" stroke-width="12.5"/>
+    <path d="M138,104 C154,140 178,150 166,172 C154,192 122,186 124,164"
+          stroke-width="12.5"/>
   </g>
 
-  <!-- ==================== The wedjat, beside him ==================== -->
-  <g transform="translate(296,186) scale(0.62)" fill="none" stroke="url(#gold)"
-     stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M26,40 C70,6 150,2 196,26"/>
-    <path d="M14,86 C56,44 148,42 200,72 C150,112 58,116 14,86 Z"/>
-    <circle cx="108" cy="78" r="20" fill="url(#gold)" stroke="none"/>
-    <path d="M84,106 L66,168"/>
-    <path d="M138,104 C154,140 178,150 166,172 C154,192 122,186 124,164"/>
-  </g>
-
-  <!-- ========================= Wordmark ========================= -->
-  <g transform="translate(494,158) scale(0.92)" fill="none" stroke="url(#gold)"
+  <!-- ===================== Wordmark ===================== -->
+  <g transform="translate(494,110) scale(0.94)" fill="none" stroke="url(#gold)"
      stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
     <g><path d="M0,0 L0,104"/><path d="M70,0 L70,104"/><path d="M0,52 L70,52"/></g>
     <g transform="translate(117,0)">
@@ -116,14 +87,14 @@
     </g>
   </g>
 
-  <g transform="translate(496,300)">
-    <path d="M0,0 L100,0" stroke="#C9962E" stroke-width="2.5" stroke-linecap="round"/>
-    <text x="0" y="44" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
-          font-size="19" letter-spacing="2" fill="#E8DFC8">
+  <g transform="translate(496,252)">
+    <path d="M0,0 L92,0" stroke="#C9962E" stroke-width="2.2" stroke-linecap="round"/>
+    <text x="0" y="42" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
+          font-size="19" letter-spacing="2.1" fill="#E8DFC8">
       A calibrated red-team harness for LLM applications
     </text>
-    <text x="0" y="78" font-family="DejaVu Sans Mono, monospace"
-          font-size="14" letter-spacing="3.4" fill="#6B8FC4">
+    <text x="0" y="76" font-family="DejaVu Sans Mono, monospace"
+          font-size="13.5" letter-spacing="3.6" fill="#6B8FC4">
       THE EYE THAT MEASURES ITS OWN SIGHT
     </text>
   </g>

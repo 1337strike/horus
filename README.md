@@ -595,12 +595,16 @@ The wedjat — the Eye of Horus — was an ancient Egyptian symbol of protection
 watchfulness, and it doubled as a system of measure. That pairing is the whole
 thesis of this project, so it seemed the right thing to put on the front.
 
-The mark places Horus himself beside his eye: the standing falcon after the cult
-statues — conical crown, wesekh collar, folded wings, talons, plinth — drawn
-frontally and bilaterally symmetric, the way the temple figures are cut. The
-symmetry is doing double duty: it is how the originals were made, and it is what
-makes the figure verifiable, since every element can be checked against its own
-mirror rather than judged by eye.
+The mark is the wedjat alone, drawn in two weights: the contour carries the
+form, finer incised lines carry the detail, the way the originals were cut. A
+single weight is clean; a considered hierarchy is refined.
+
+It is placed by optical centre rather than bounding box. The eye's tail curls
+are visually lighter than the almond, so its weight sits about 21px above its
+geometric middle — align the boxes and the mark reads as sitting too low next to
+the type. Aligning the ink centroids instead puts both at exactly the same
+height. Precision and open space are doing the work here; there is no ornament
+to fall back on.
 
 The palette is taken from the materials the original symbol was made from rather
 than from a default dark theme. The gold is a multi-stop gradient rather than a
