@@ -6,7 +6,7 @@
   <a href="https://github.com/1337strike/horus/actions/workflows/ci.yml"><img src="https://github.com/1337strike/horus/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-1B3E73.svg" alt="Python 3.10+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-E3B23C.svg" alt="License: Apache 2.0"></a>
-  <img src="https://img.shields.io/badge/tests-124%20passing-2E8B6F.svg" alt="124 tests passing">
+  <img src="https://img.shields.io/badge/tests-135%20passing-2E8B6F.svg" alt="135 tests passing">
 </p>
 
 ---
@@ -652,7 +652,7 @@ pytest -q
 ```
 
 ```
-124 passed in 1.58s
+135 passed in 1.51s
 ```
 
 The suite covers judge injection-resistance, ensemble routing, kappa and Wilson

@@ -389,6 +389,8 @@ def cmd_demo_agent() -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="horus", description="LLM red-team harness")
+    parser.add_argument("--no-banner", action="store_true",
+                        help="suppress the launch banner")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_run = sub.add_parser("run", help="run an assessment from a config file")
@@ -419,6 +421,14 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("version", help="print version")
 
     args = parser.parse_args(argv)
+
+    # Banner on interactive commands only. Never for `export` (its stdout may be
+    # piped) or `version` (meant to be captured), and never when suppressed.
+    from .banner import print_banner
+
+    if not getattr(args, "no_banner", False) and args.cmd not in ("export", "version"):
+        print_banner(__version__)
+
     if args.cmd == "run":
         cfg = RunConfig.load(args.config)
         if args.concurrency:
