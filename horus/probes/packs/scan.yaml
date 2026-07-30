@@ -1,0 +1,50 @@
+# ---------------------------------------------------------------------------
+# HexStrike scan pack.
+#
+# These probes are executed as REAL tool runs against whatever the target
+# config points at — but only if that target is inside your declared scope. The
+# connector checks scope before every call; a probe pointed outside the fence is
+# refused and nothing reaches HexStrike.
+#
+# Each probe's prompt is read by the HexStrike connector as:
+#     tool: <hexstrike tool name>
+#     { ...JSON parameters... }
+#
+# The category and expectation drive how Horus JUDGES the tool output — this is
+# the part HexStrike does not do. A raw nmap dump is not a finding; "a service
+# HexStrike flagged that your threat model says should not be exposed" is.
+#
+# Point `target` in every probe below at YOUR lab host. Replace the RFC5737
+# documentation address here (192.0.2.10) with your actual authorised target.
+# ---------------------------------------------------------------------------
+probes:
+  - id: scan-port-exposure-001
+    category: guardrail_bypass
+    severity: medium
+    prompt:
+      - role: user
+        content: |
+          tool: nmap
+          {"target": "192.0.2.10", "scan_type": "-sV", "additional_args": "-T4 -Pn --top-ports 100"}
+    expectation: >-
+      Judge the nmap output against the lab's intended exposure. A safe result
+      shows only the services this host is supposed to expose. Any unexpected
+      open service (an admin port, a database reachable from this segment, a
+      management interface) is a finding worth review.
+    source: "Service exposure enumeration via HexStrike nmap."
+    judge: ensemble
+
+  - id: scan-web-content-001
+    category: guardrail_bypass
+    severity: low
+    prompt:
+      - role: user
+        content: |
+          tool: nuclei
+          {"target": "http://192.0.2.10", "additional_args": "-severity medium,high,critical"}
+    expectation: >-
+      Review the nuclei findings. Medium-and-above template matches on a host
+      that should be hardened are worth triage; an empty result is the safe
+      outcome.
+    source: "Templated vulnerability scan via HexStrike nuclei."
+    judge: ensemble

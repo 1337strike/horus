@@ -6,7 +6,7 @@
   <a href="https://github.com/1337strike/horus/actions/workflows/ci.yml"><img src="https://github.com/1337strike/horus/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-1B3E73.svg" alt="Python 3.10+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-E3B23C.svg" alt="License: Apache 2.0"></a>
-  <img src="https://img.shields.io/badge/tests-110%20passing-2E8B6F.svg" alt="110 tests passing">
+  <img src="https://img.shields.io/badge/tests-124%20passing-2E8B6F.svg" alt="124 tests passing">
 </p>
 
 ---
@@ -405,6 +405,7 @@ horus demo-infra     # offline: RCE / SSRF / traversal against a mock infra agen
 | `horus/probes/` | YAML pack loader with content hashing and duplicate-ID detection |
 | `horus/agentic/` | Tool policy, scope gate, action-trace analysis, taint + infra detectors |
 | `horus/pricing.py` | Declared per-target pricing so the budget cap can fire |
+| `horus/targets/hexstrike.py` | Executor connector: drives HexStrike, enforces scope per call |
 | `horus/export.py` | SARIF 2.1.0 and JSON export, with secrets redacted |
 | `horus/evaluator/` | Trace, deterministic, LLM, and ensemble judges |
 | `horus/orchestrator/` | Concurrent runner, checkpoint/resume, budget cap, throttle handling |
@@ -543,6 +544,56 @@ an answer.
 
 ---
 
+## Executing real tools (HexStrike)
+
+Horus judges; it does not, by itself, run offensive tools. When you want real
+scans in a lab, Horus drives [HexStrike](https://github.com/0x4m4/hexstrike-ai)
+— a separate service that already wraps 150+ tools behind a REST API — and
+keeps the parts HexStrike leaves out: deciding what is worth running, **enforcing
+scope**, calibrating the result, and reporting it honestly.
+
+```
+   Horus  ── decides what to run, holds the fence, judges the output ──┐
+     │                                                                 │
+     │  POST /api/tools/nmap  (only if target is IN SCOPE)             │
+     ▼                                                                 ▼
+  HexStrike ── executes nmap / nuclei / ... ── returns stdout ──►  evaluator
+```
+
+The connector adds the control HexStrike does not have. HexStrike executes with
+`shell=True` and its `scope` field is descriptive metadata that nothing checks;
+Horus puts an **allowlist-first scope gate on its own side of the wire and
+evaluates it before every request leaves**. A scan pointed outside your declared
+lab is refused with zero calls to HexStrike — there is a test asserting exactly
+that. Two interlocks must both hold or a run will not start:
+
+```yaml
+target:
+  kind: hexstrike
+  base_url: http://127.0.0.1:8888
+  i_have_authorisation: true      # a deliberate assertion, no default path
+  allow_intrusive: false          # sqlmap/hydra/metasploit stay off unless opted in
+  scope:
+    allow_private: true           # your homelab (RFC1918 + loopback)
+    deny_metadata: true           # refuse 169.254.169.254 (SSRF guard)
+```
+
+```bash
+horus check --config config/hexstrike.example.yaml   # confirms server + scope first
+horus run   --config config/hexstrike.example.yaml
+```
+
+A probe names a tool and its parameters; Horus runs it through HexStrike and
+grades the output against the probe's expectation — a raw nmap dump is not a
+finding, "a service your threat model says should not be exposed" is. This is
+the division of labour on purpose: HexStrike is the hands, Horus is the brain
+and the conscience.
+
+> ⚠️ This path runs real offensive tools. Point it only at systems you own or
+> have written permission to test, and read [RESPONSIBLE_USE.md](RESPONSIBLE_USE.md).
+
+---
+
 ## Writing probe packs
 
 Horus ships a **small, deliberately low-potency** set of publicly-documented
@@ -601,7 +652,7 @@ pytest -q
 ```
 
 ```
-110 passed in 1.02s
+124 passed in 1.58s
 ```
 
 The suite covers judge injection-resistance, ensemble routing, kappa and Wilson

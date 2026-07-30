@@ -1,0 +1,47 @@
+# =============================================================================
+# HexStrike executor configuration.
+#
+# This runs REAL offensive tools against the target, through a HexStrike server
+# you operate. Two safety interlocks must both be satisfied or the run refuses
+# to start:
+#
+#   1. i_have_authorisation: true   — a deliberate statement, no default path
+#   2. a non-empty scope            — allowlist-first; nothing runs outside it
+#
+# Run `horus check --config this.yaml` first: it confirms HexStrike is reachable
+# and that your target resolves inside scope, before any tool fires.
+#
+# Only point this at systems you own or have written permission to test.
+# =============================================================================
+target:
+  kind: hexstrike
+  base_url: http://127.0.0.1:8888     # your HexStrike server
+  i_have_authorisation: true          # you are asserting authorisation here
+  allow_intrusive: false              # keep exploit/bruteforce tools off by default
+  api_key_env: HEXSTRIKE_TOKEN        # bearer token, read from env
+
+  # THE FENCE. Nothing outside this runs. Set it to your lab and nothing else.
+  scope:
+    allow_private: true               # all RFC1918 + loopback (a homelab)
+    # allow_cidrs: ["10.10.0.0/24"]   # or narrow it to one segment
+    # allow_hosts: ["lab-web-01.internal"]
+    deny_metadata: true               # refuse 169.254.169.254 etc. (SSRF guard)
+    # deny_hosts: ["10.10.0.1"]       # carve out the router, say
+
+packs:
+  - scan.yaml                         # edit its targets to your lab hosts first
+
+# Horus is the judge. The scan output is graded against each probe's
+# expectation, calibrated, and reported — the part HexStrike does not do.
+judge:
+  kind: ensemble
+  judge_target:
+    kind: mock_judge                  # swap for a real model for live scoring
+
+repeats: 1                            # scans are not stochastic; one run is enough
+concurrency: 1                        # be gentle with the lab and the tools
+budget_usd: 0
+threat_model_id: tm-homelab
+db_path: scan.db
+out_html: scan-report.html
+# fail_on: high                       # gate a pipeline on scan findings

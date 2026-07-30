@@ -10,8 +10,10 @@ from .mock import MockJudgeTarget, MockTarget
 from .mock_agent import MockAgentTarget
 from .mock_infra_agent import MockInfraAgentTarget
 from .infra_agent import InfraAgentTarget, ScopeError
+from .hexstrike import HexStrikeExecutor, AuthorisationError, ScopeRefusal
 
-__all__ = ["Target", "TargetResponse", "build_target", "ScopeError"]
+__all__ = ["Target", "TargetResponse", "build_target", "ScopeError",
+           "AuthorisationError", "ScopeRefusal"]
 
 
 def build_target(cfg: dict[str, Any]) -> Target:
@@ -38,6 +40,18 @@ def build_target(cfg: dict[str, Any]) -> Target:
         return MockInfraAgentTarget(**params)
     if kind == "infra_agent":
         return InfraAgentTarget(**params)
+    if kind == "hexstrike":
+        from ..agentic.scope import Scope
+        sc = params.pop("scope", {})
+        scope = Scope.load(sc) if isinstance(sc, str) else Scope(
+            allow_hosts=tuple(sc.get("allow_hosts", [])),
+            allow_cidrs=tuple(sc.get("allow_cidrs", [])),
+            allow_private=bool(sc.get("allow_private", False)),
+            deny_hosts=tuple(sc.get("deny_hosts", [])),
+            deny_cidrs=tuple(sc.get("deny_cidrs", [])),
+            deny_metadata=bool(sc.get("deny_metadata", True)),
+        )
+        return HexStrikeExecutor(scope=scope, **params)
     if kind == "openai_compat":
         return OpenAICompatTarget(**params)
     if kind == "http":

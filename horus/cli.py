@@ -182,6 +182,19 @@ def cmd_check(cfg: RunConfig) -> int:
         return 1
     info = target.info()
     print(f"  target        ..    {info.kind} / {info.model_snapshot}")
+
+    # HexStrike executor: confirm the server is reachable before probing, and
+    # make it loud that this run executes real tools.
+    if info.params.get("executes_real_tools"):
+        print("  mode          !!    EXECUTES REAL TOOLS — authorised scope only")
+        up, detail = target.health() if hasattr(target, "health") else (False, "n/a")
+        if up:
+            print(f"  hexstrike     OK    reachable ({detail})")
+        else:
+            print(f"  hexstrike     FAIL  {detail}")
+            return 1
+        if info.params.get("allow_intrusive"):
+            print("  intrusive     WARN  exploit/bruteforce tools are ENABLED")
     if "scope_ok" in info.params:
         print(f"  scope         OK    endpoint in scope "
               f"(resolved {info.params.get('scope_resolved')})")
