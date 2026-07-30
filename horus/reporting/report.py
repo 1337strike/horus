@@ -101,6 +101,9 @@ def aggregate(manifest, attempts: list[Attempt], verdicts: list[Verdict]) -> Sum
                     "response": a.response_text,
                     "rationale": v.rationale,
                     "confidence": v.confidence,
+                    # For agentic findings the action trace IS the evidence —
+                    # the prose is often a polite refusal issued alongside it.
+                    "tool_calls": a.tool_calls,
                 }
         elif v.outcome == Outcome.PARTIAL:
             s.partials += 1

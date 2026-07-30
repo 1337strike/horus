@@ -50,10 +50,21 @@ class MockTarget(Target):
         # are stochastic — the same probe can pass four times and fail once.
         self.leak_probability = leak_probability
         self._seed = seed
+        self._calls = 0
 
     def _rng_for(self, messages: list[dict[str, str]]) -> random.Random:
-        blob = "".join(m["content"] for m in messages)
-        h = int(hashlib.sha256((blob + str(self._seed)).encode()).hexdigest(), 16)
+        """Seeded RNG that varies across repeats but replays identically per run.
+
+        Seeding from message content alone would make every repeat of a probe
+        return the same answer, which would quietly defeat the whole point of
+        running N times: a target that fails 8/8 or 0/8 every time produces
+        degenerate rates and meaningless confidence intervals. Mixing in a
+        per-instance call counter gives genuine variation across repeats while
+        keeping the run fully reproducible from (seed, call order).
+        """
+        self._calls += 1
+        blob = "".join(m.get("content", "") for m in messages)
+        h = int(hashlib.sha256(f"{blob}|{self._seed}|{self._calls}".encode()).hexdigest(), 16)
         return random.Random(h)
 
     def send(self, messages: list[dict[str, str]]) -> TargetResponse:

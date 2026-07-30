@@ -44,6 +44,7 @@ def _probe_from_dict(d: dict[str, Any]) -> Probe:
         expectation=d["expectation"],
         fail_regexes=tuple(d.get("fail_regexes", [])),
         canaries=tuple(d.get("canaries", [])),
+        must_not_call=tuple(d.get("must_not_call", [])),
         source=d.get("source", ""),
         tags=tuple(d.get("tags", [])),
         judge=JudgeKind(d.get("judge", "ensemble")),

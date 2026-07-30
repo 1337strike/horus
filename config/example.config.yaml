@@ -20,6 +20,11 @@ target:
 #   api_key_env: OPENAI_API_KEY       # read from env, never hard-code secrets
 #   temperature: 0.0
 
+# Example: an agentic target (has tools). Requires `tool_policy` below, or the
+# action trace cannot be judged and Horus will warn you.
+# target:
+#   kind: mock_agent
+
 # Example: an arbitrary chatbot behind HTTP.
 # target:
 #   kind: http
@@ -35,7 +40,13 @@ target:
 packs:
   - examples.yaml
   - benign_baseline.yaml
+  # - agentic.yaml                 # tool-abuse probes; needs tool_policy below
   # - /path/to/your/authored/pack.yaml
+
+# --- Tool policy (agentic targets only) --------------------------------------
+# Declares what authority the agent actually has. Action traces are judged
+# against this; without it, tool_abuse probes fall back to text-only scoring.
+# tool_policy: config/tool_policy.example.yaml
 
 # --- Judge -------------------------------------------------------------------
 judge:

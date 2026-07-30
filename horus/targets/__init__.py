@@ -7,6 +7,7 @@ from typing import Any
 from .base import Target, TargetResponse
 from .http import HTTPTarget, OpenAICompatTarget
 from .mock import MockJudgeTarget, MockTarget
+from .mock_agent import MockAgentTarget
 
 __all__ = ["Target", "TargetResponse", "build_target"]
 
@@ -29,6 +30,8 @@ def build_target(cfg: dict[str, Any]) -> Target:
         return MockTarget(**params)
     if kind == "mock_judge":
         return MockJudgeTarget()
+    if kind == "mock_agent":
+        return MockAgentTarget(**params)
     if kind == "openai_compat":
         return OpenAICompatTarget(**params)
     if kind == "http":

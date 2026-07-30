@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .agentic import ToolPolicy
 from .calibration import calibrate, load_goldset
 from .config import RunConfig
 from .evaluator import DeterministicJudge, EnsembleJudge, LLMJudge
@@ -30,6 +31,17 @@ from .targets import build_target
 _PKG = Path(__file__).parent
 
 
+def _load_policy(cfg: RunConfig) -> ToolPolicy | None:
+    """Load the tool policy if one is configured (required for agentic runs)."""
+    if not cfg.tool_policy:
+        return None
+    path = Path(cfg.tool_policy)
+    if not path.exists():
+        alt = _PKG.parent / cfg.tool_policy
+        path = alt if alt.exists() else path
+    return ToolPolicy.load(path)
+
+
 def _build_judge(cfg: RunConfig):
     if cfg.judge.kind == "deterministic":
         return DeterministicJudge()
@@ -39,7 +51,12 @@ def _build_judge(cfg: RunConfig):
         llm = LLMJudge(judge_target)
     if cfg.judge.kind == "llm":
         return llm
-    return EnsembleJudge(llm, review_low=cfg.judge.review_low, review_high=cfg.judge.review_high)
+    return EnsembleJudge(
+        llm,
+        tool_policy=_load_policy(cfg),
+        review_low=cfg.judge.review_low,
+        review_high=cfg.judge.review_high,
+    )
 
 
 def _resolve_pack_paths(packs: list[str]) -> list[str]:
@@ -69,6 +86,10 @@ def cmd_run(cfg: RunConfig) -> int:
         repeats=cfg.repeats, budget_usd=cfg.budget_usd,
         threat_model_id=cfg.threat_model_id, horus_version=__version__,
     )
+
+    if any(p.category is Category.TOOL_ABUSE for p in probes) and not cfg.tool_policy:
+        print("[horus] WARNING: tool_abuse probes loaded but no tool_policy configured — "
+              "action traces cannot be judged and will be scored on text alone.")
 
     print(f"[horus] running {len(probes)} probes x {cfg.repeats} repeats "
           f"against {target.info().model_snapshot} ...")
@@ -143,6 +164,21 @@ def cmd_demo() -> int:
     return cmd_run(cfg)
 
 
+def cmd_demo_agent() -> int:
+    from .config import JudgeConfig
+
+    cfg = RunConfig(
+        target={"kind": "mock_agent"},
+        packs=["agentic.yaml"],
+        judge=JudgeConfig(kind="ensemble", judge_target={"kind": "mock_judge"}),
+        repeats=8,
+        tool_policy=str(_PKG.parent / "config" / "tool_policy.example.yaml"),
+        db_path="horus_agent_demo.db",
+        out_html="horus_agent_demo_report.html",
+    )
+    return cmd_run(cfg)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="horus", description="LLM red-team harness")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -155,6 +191,7 @@ def main(argv: list[str] | None = None) -> int:
     p_cal.add_argument("--gold", required=True)
 
     sub.add_parser("demo", help="zero-config run against the built-in mock target")
+    sub.add_parser("demo-agent", help="zero-config agentic run (tool-abuse trace evaluation)")
     sub.add_parser("version", help="print version")
 
     args = parser.parse_args(argv)
@@ -164,6 +201,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_calibrate(RunConfig.load(args.config), args.gold)
     if args.cmd == "demo":
         return cmd_demo()
+    if args.cmd == "demo-agent":
+        return cmd_demo_agent()
     if args.cmd == "version":
         print(f"horus {__version__}")
         return 0

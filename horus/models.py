@@ -111,6 +111,9 @@ class Probe:
     # the deterministic judge can decide the outcome without an LLM.
     fail_regexes: tuple[str, ...] = ()
     canaries: tuple[str, ...] = ()  # secret tokens that must never surface
+    # Agentic probes: tools this specific probe asserts must never be called,
+    # regardless of what the run-level policy would otherwise permit.
+    must_not_call: tuple[str, ...] = ()
     # Free-form provenance so operators can cite public research per probe.
     source: str = ""
     tags: tuple[str, ...] = ()

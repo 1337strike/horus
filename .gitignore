@@ -4,9 +4,11 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
-# Run artifacts hold adversarial content + client findings — never commit them.
-*.db
-horus_report.html
-horus_demo_report.html
-*.local.yaml
 .venv/
+venv/
+
+# Run artifacts hold adversarial content AND findings about a real system —
+# often someone else's. Never commit them. See RESPONSIBLE_USE.md.
+*.db
+*report.html
+*.local.yaml

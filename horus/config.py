@@ -29,6 +29,7 @@ class RunConfig:
     repeats: int = 5
     budget_usd: float = 5.0
     threat_model_id: str = ""
+    tool_policy: str = ""      # path to a tool policy YAML (agentic targets)
     db_path: str = "horus.db"
     out_html: str = "horus_report.html"
 
@@ -48,6 +49,7 @@ class RunConfig:
             repeats=data.get("repeats", 5),
             budget_usd=data.get("budget_usd", 5.0),
             threat_model_id=data.get("threat_model_id", ""),
+            tool_policy=data.get("tool_policy", ""),
             db_path=data.get("db_path", "horus.db"),
             out_html=data.get("out_html", "horus_report.html"),
         )
