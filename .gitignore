@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+# Run artifacts hold adversarial content + client findings — never commit them.
+*.db
+horus_report.html
+horus_demo_report.html
+*.local.yaml
+.venv/

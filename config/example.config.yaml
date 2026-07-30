@@ -1,0 +1,61 @@
+# =============================================================================
+# Horus run configuration (annotated reference).
+#
+# A run is fully described by this file so it is version-controllable and
+# reproducible. Copy it, point `target` at a system you are AUTHORISED to test,
+# and run:  horus run --config config/my.config.yaml
+# =============================================================================
+
+# --- Target under test -------------------------------------------------------
+# The built-in mock needs no keys and is great for trying the tool out.
+target:
+  kind: mock            # mock | openai_compat | http
+  leak_probability: 0.25
+
+# Example: an OpenAI-compatible endpoint (also works for many local servers).
+# target:
+#   kind: openai_compat
+#   base_url: https://api.openai.com/v1
+#   model: gpt-4o-mini-2024-07-18     # use a DATED snapshot for reproducibility
+#   api_key_env: OPENAI_API_KEY       # read from env, never hard-code secrets
+#   temperature: 0.0
+
+# Example: an arbitrary chatbot behind HTTP.
+# target:
+#   kind: http
+#   endpoint: https://chat.internal.example.com/v1/message
+#   model: support-bot-2025-06
+#   headers: { Authorization: "${SUPPORT_BOT_TOKEN}" }
+#   body_template: { stream: false }
+#   messages_field: messages
+#   response_path: data.reply.text     # dotted path to the reply in the JSON
+
+# --- Probe packs -------------------------------------------------------------
+# Shipped packs can be referenced by filename; your own by full path.
+packs:
+  - examples.yaml
+  - benign_baseline.yaml
+  # - /path/to/your/authored/pack.yaml
+
+# --- Judge -------------------------------------------------------------------
+judge:
+  kind: ensemble          # deterministic | llm | ensemble (recommended)
+  review_low: 0.35        # verdicts in [low, high] confidence are flagged
+  review_high: 0.65       # for human review and feed the gold set
+  # Use a DIFFERENT model/provider for the judge than the target under test,
+  # to avoid shared blind spots. Here we use the offline heuristic judge so the
+  # demo needs no keys; swap it for a real model in a real assessment.
+  judge_target:
+    kind: mock_judge
+  # judge_target:
+  #   kind: openai_compat
+  #   base_url: https://api.anthropic.com/v1   # e.g. a different provider
+  #   model: some-judge-model-snapshot
+  #   api_key_env: JUDGE_API_KEY
+
+# --- Execution ---------------------------------------------------------------
+repeats: 8                # each probe is run N times; we report success RATES
+budget_usd: 5.0           # hard cap; the run stops if exceeded
+threat_model_id: tm-support-bot-v1   # ties the run to a threat model doc
+db_path: horus.db
+out_html: horus_report.html

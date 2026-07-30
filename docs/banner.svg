@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-label="Horus — calibrated red-team harness for LLM applications">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#070D18"/>
+      <stop offset="55%"  stop-color="#0F2440"/>
+      <stop offset="100%" stop-color="#163A69"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%"   stop-color="#E3B23C" stop-opacity="0.20"/>
+      <stop offset="70%"  stop-color="#E3B23C" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#E3B23C" stop-opacity="0"/>
+    </radialGradient>
+    <!-- userSpaceOnUse is required: a perfectly vertical or horizontal path has a
+         zero-area bounding box, and an objectBoundingBox gradient on such a path
+         fails to render at all — which silently erased the H of the wordmark. -->
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="80" x2="0" y2="300">
+      <stop offset="0%"   stop-color="#F5D77A"/>
+      <stop offset="55%"  stop-color="#E3B23C"/>
+      <stop offset="100%" stop-color="#C08D26"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ground -->
+  <rect width="1200" height="380" fill="url(#sky)"/>
+  <circle cx="255" cy="190" r="230" fill="url(#glow)"/>
+
+  <!-- ================= Eye of Horus (wedjat) ==================
+       Drawn monoline, same 15px pen as the wordmark, so glyph and
+       lettering read as one hand. -->
+  <g transform="translate(96,88) scale(1.06)"
+     fill="none" stroke="url(#gold)" stroke-width="15"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- brow: sweeps past the outer corner -->
+    <path d="M26,40 C70,6 150,2 196,26"/>
+
+    <!-- eye almond -->
+    <path d="M14,86 C56,44 148,42 200,72 C150,112 58,116 14,86 Z"/>
+
+    <!-- pupil -->
+    <circle cx="108" cy="78" r="19" fill="url(#gold)" stroke="none"/>
+
+    <!-- descending falcon marking (the 'teardrop') -->
+    <path d="M84,106 L66,168"/>
+
+    <!-- spiral tail curling from the outer corner -->
+    <path d="M138,104 C154,140 178,150 166,172 C154,192 122,186 124,164"/>
+  </g>
+
+  <!-- ================= Wordmark: HORUS =================
+       Custom monoline caps, constructed rather than typeset.
+       Cap block is aligned to the eye's main mass (brow + almond) so the two
+       read as one line; the eye's tail and the taglines both hang below. -->
+  <g transform="translate(432,97)"
+     fill="none" stroke="url(#gold)" stroke-width="15"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- H -->
+    <g transform="translate(0,0)">
+      <path d="M0,0 L0,104"/>
+      <path d="M70,0 L70,104"/>
+      <path d="M0,52 L70,52"/>
+    </g>
+
+    <!-- O -->
+    <g transform="translate(117,0)">
+      <path d="M0,30 C0,10 18,0 39,0 C60,0 78,10 78,30 L78,74
+               C78,94 60,104 39,104 C18,104 0,94 0,74 Z"/>
+    </g>
+
+    <!-- R -->
+    <g transform="translate(240,0)">
+      <path d="M0,0 L0,104"/>
+      <path d="M0,0 L44,0 C68,0 68,52 44,52 L0,52"/>
+      <path d="M40,52 L74,104"/>
+    </g>
+
+    <!-- U -->
+    <g transform="translate(356,0)">
+      <path d="M0,0 L0,70 C0,92 17,104 38,104 C59,104 76,92 76,70 L76,0"/>
+    </g>
+
+    <!-- S -->
+    <g transform="translate(473,0)">
+      <path d="M72,20 C64,6 44,-2 26,4 C4,12 0,38 22,48
+               C46,58 74,64 74,84 C74,100 52,110 32,104 C18,100 8,92 4,82"/>
+    </g>
+  </g>
+
+  <!-- hairline rule + tagline -->
+  <g transform="translate(434,243)">
+    <path d="M0,0 L118,0" stroke="#E3B23C" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    <text x="0" y="44" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
+          font-size="21" font-weight="400" letter-spacing="2.4" fill="#EDE4D0">
+      A calibrated red-team harness for LLM applications
+    </text>
+    <text x="0" y="80" font-family="DejaVu Sans Mono, monospace"
+          font-size="16" letter-spacing="3.8" fill="#7FA3CE">
+      THE EYE THAT MEASURES ITS OWN SIGHT
+    </text>
+  </g>
+</svg>

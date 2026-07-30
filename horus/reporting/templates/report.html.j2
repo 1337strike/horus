@@ -1,0 +1,224 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horus Report — {{ summary.run_id }}</title>
+<style>
+  :root{
+    --ink:#17191e; --paper:#f7f6f2; --card:#ffffff; --steel:#5b6570;
+    --line:#e2e0d8; --line-strong:#c9c6bc;
+    --signal:#b23528;   /* reserved: failures / high severity */
+    --safe:#2f6d5b;     /* pass */
+    --amber:#b7791f;    /* partial / caution */
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:48px 28px 96px}
+  a{color:var(--signal)}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.01em;font-weight:650}
+  h1{font-size:30px;margin:0 0 4px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--steel);
+     font-weight:650;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line-strong)}
+  .mono{font-family:var(--mono)}
+  .muted{color:var(--steel)}
+  .small{font-size:12.5px}
+
+  /* Masthead */
+  .masthead{display:flex;justify-content:space-between;align-items:flex-start;
+            gap:20px;border-bottom:2px solid var(--ink);padding-bottom:18px}
+  .brand{font-family:var(--mono);font-size:12px;letter-spacing:.28em;
+         text-transform:uppercase;color:var(--steel)}
+  .manifest{font-family:var(--mono);font-size:11.5px;color:var(--steel);text-align:right;
+            white-space:pre-line}
+  .manifest b{color:var(--ink);font-weight:600}
+
+  /* Headline verdict: the two axes, never merged */
+  .axes{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
+  .axis{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+  .axis .label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+               text-transform:uppercase;color:var(--steel)}
+  .axis .big{font-size:44px;font-weight:680;font-family:var(--mono);letter-spacing:-.02em;
+             margin:6px 0 2px}
+  .axis.attack .big{color:var(--signal)}
+  .axis.util .big{color:var(--amber)}
+  .axis .sub{font-size:12.5px;color:var(--steel)}
+
+  /* The signature element: a signal meter with CI whisker */
+  .meter-row{display:grid;grid-template-columns:210px 1fr 92px;gap:16px;align-items:center;
+             padding:15px 0;border-bottom:1px solid var(--line)}
+  .meter-row:last-child{border-bottom:none}
+  .cat-name{font-weight:600;font-size:14px}
+  .cat-tax{font-family:var(--mono);font-size:11px;color:var(--steel);margin-top:2px}
+  .track{position:relative;height:22px;background:#eeece5;border-radius:4px;overflow:visible}
+  .fill{position:absolute;top:0;left:0;height:100%;border-radius:4px 0 0 4px;
+        background:linear-gradient(90deg,var(--amber),var(--signal))}
+  /* confidence interval whisker sits above the fill */
+  .whisker{position:absolute;top:-6px;height:34px;border-left:2px solid var(--ink);
+           border-right:2px solid var(--ink)}
+  .whisker::before{content:"";position:absolute;top:50%;left:0;right:0;
+                   border-top:1px dashed var(--ink);opacity:.45}
+  .rate{font-family:var(--mono);font-size:16px;font-weight:600;text-align:right}
+  .rate .ci{display:block;font-size:10.5px;color:var(--steel);font-weight:400}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+     color:var(--steel);font-weight:600}
+  td.mono{font-family:var(--mono);font-size:12px}
+
+  .callout{border-left:3px solid var(--amber);background:#fbf7ee;padding:14px 18px;
+           border-radius:0 8px 8px 0;font-size:13px;margin:10px 0}
+  .callout.crit{border-left-color:var(--signal);background:#fcf0ee}
+  .callout.ok{border-left-color:var(--safe);background:#eef5f2}
+
+  .chip{font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:999px;
+        border:1px solid var(--line-strong)}
+  .chip.fail{color:var(--signal);border-color:var(--signal)}
+  .chip.pass{color:var(--safe);border-color:var(--safe)}
+
+  details.tx{background:var(--card);border:1px solid var(--line);border-radius:8px;
+             margin:10px 0;overflow:hidden}
+  details.tx summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:13px;
+                     list-style:none;display:flex;justify-content:space-between;gap:10px}
+  details.tx summary::-webkit-details-marker{display:none}
+  .tx-body{padding:0 16px 16px}
+  .bubble{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;
+          background:#f4f2ec;border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:8px 0}
+  .bubble .who{display:block;color:var(--steel);font-size:10px;text-transform:uppercase;
+               letter-spacing:.1em;margin-bottom:5px}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line-strong);
+          font-size:11.5px;color:var(--steel);font-family:var(--mono)}
+
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  @media (max-width:640px){
+    .axes{grid-template-columns:1fr}
+    .meter-row{grid-template-columns:1fr;gap:8px}
+    .rate{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media print{body{background:#fff}.axis,details.tx{break-inside:avoid}}
+</style>
+
+<div class="wrap">
+  <div class="masthead">
+    <div>
+      <div class="brand">Horus · LLM Red-Team</div>
+      <h1>Adversarial Assessment</h1>
+      <div class="muted small">Authorised security evaluation — see responsible-use scope.</div>
+    </div>
+    <div class="manifest">Run <b>{{ summary.run_id }}</b>
+Target <b>{{ summary.model_snapshot }}</b>
+Repeats <b>{{ manifest.repeats }}</b> · Attempts <b>{{ summary.total_attempts }}</b>
+Spend <b>${{ '%.4f'|format(summary.spent_usd) }}</b>
+{{ summary.started_at[:19] }}</div>
+  </div>
+
+  <div class="axes">
+    <div class="axis attack">
+      <div class="label">Axis 1 · Guardrail failures</div>
+      <div class="big">{{ '%.0f'|format(summary.overall_asr*100) }}%</div>
+      <div class="sub">Overall attack success rate across {{ summary.attack_categories|length }} categories.
+        Lower is safer.</div>
+    </div>
+    <div class="axis util">
+      <div class="label">Axis 2 · Over-refusal</div>
+      {% if summary.refusal_stat %}
+      <div class="big">{{ '%.0f'|format(summary.refusal_stat.rate*100) }}%</div>
+      <div class="sub">Benign, in-policy requests wrongly refused. Lower is better;
+        a model that refuses everything is not "secure".</div>
+      {% else %}
+      <div class="big">—</div>
+      <div class="sub">No benign baseline pack was run. Assessment is single-axis and incomplete.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <h2>Attack success by category</h2>
+  <div class="muted small" style="margin-bottom:8px">
+    Bar = attack success rate. Bracket above each bar = 95% Wilson confidence interval;
+    a wide bracket means few samples and weak evidence — run more repeats to narrow it.
+  </div>
+  {% for c in summary.attack_categories %}
+    {% set lo = c.ci[0]*100 %}{% set hi = c.ci[1]*100 %}
+    <div class="meter-row">
+      <div>
+        <div class="cat-name">{{ c.category.value|replace('_',' ')|title }}</div>
+        <div class="cat-tax">{{ tax[c.category.value].owasp }} · {{ tax[c.category.value].atlas }}</div>
+      </div>
+      <div class="track">
+        <div class="fill" style="width:{{ '%.1f'|format(c.rate*100) }}%"></div>
+        <div class="whisker" style="left:{{ '%.1f'|format(lo) }}%;width:{{ '%.1f'|format(hi-lo) }}%"></div>
+      </div>
+      <div class="rate">{{ '%.0f'|format(c.rate*100) }}%
+        <span class="ci">{{ c.fails }}/{{ c.total-c.errors }} · CI {{ '%.0f'|format(lo) }}–{{ '%.0f'|format(hi) }}</span>
+      </div>
+    </div>
+  {% endfor %}
+
+  {% if calibration %}
+  <h2>Judge calibration</h2>
+  <div class="callout {{ 'ok' if calibration.kappa>=0.6 else 'crit' if calibration.kappa<0.4 else '' }}">
+    <b>κ = {{ '%.2f'|format(calibration.kappa) }}</b> over {{ calibration.n }} human-labelled items
+    ({{ calibration.verdict_label() }}). Precision {{ '%.2f'|format(calibration.precision_fail) }} ·
+    Recall {{ '%.2f'|format(calibration.recall_fail) }} on the FAIL class.
+    Every success rate above should be read through this lens.
+  </div>
+  {% else %}
+  <h2>Judge calibration</h2>
+  <div class="callout crit">
+    No calibration was run against a human gold set. The success rates above are
+    <b>uncalibrated</b> — treat them as indicative, not authoritative, until a gold
+    set is labelled and <span class="mono">horus calibrate</span> is run.
+  </div>
+  {% endif %}
+
+  <h2>Taxonomy coverage</h2>
+  <table>
+    <tr><th>Category</th><th>OWASP LLM</th><th>MITRE ATLAS</th><th>What it tests</th></tr>
+    {% for c in summary.attack_categories %}
+    <tr>
+      <td>{{ c.category.value|replace('_',' ')|title }}</td>
+      <td class="mono">{{ tax[c.category.value].owasp }}</td>
+      <td class="mono">{{ tax[c.category.value].atlas }}</td>
+      <td class="small">{{ tax[c.category.value].summary }}</td>
+    </tr>
+    {% endfor %}
+    {% if summary.refusal_stat %}
+    <tr>
+      <td>Over Refusal</td>
+      <td class="mono">{{ tax['over_refusal'].owasp }}</td>
+      <td class="mono">{{ tax['over_refusal'].atlas }}</td>
+      <td class="small">{{ tax['over_refusal'].summary }}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <h2>Evidence · worst example per category</h2>
+  {% for c in summary.attack_categories if c.worst_example %}
+    {% set ex = c.worst_example %}
+    <details class="tx">
+      <summary>
+        <span>{{ c.category.value|replace('_',' ')|title }} — <span class="mono">{{ ex.probe_id }}</span></span>
+        <span class="chip fail">FAIL · conf {{ '%.2f'|format(ex.confidence) }}</span>
+      </summary>
+      <div class="tx-body">
+        {% for m in ex.request %}
+        <div class="bubble"><span class="who">{{ m.role }}</span>{{ m.content }}</div>
+        {% endfor %}
+        <div class="bubble" style="border-color:var(--signal)">
+          <span class="who" style="color:var(--signal)">target response</span>{{ ex.response }}</div>
+        <div class="small muted">Judge rationale: {{ ex.rationale }}</div>
+      </div>
+    </details>
+  {% else %}
+    <div class="callout ok">No category produced a failing example in this run.</div>
+  {% endfor %}
+
+  <footer>
+    Generated by Horus v{{ manifest.horus_version }} · Run {{ summary.run_id }} ·
+    {{ summary.finished_at[:19] }} · Findings are sensitive; handle per RESPONSIBLE_USE.md.
+  </footer>
+</div>

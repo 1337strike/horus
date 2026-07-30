@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "horus"
+version = "0.1.0"
+description = "A calibrated red-team harness for LLM applications (authorised testing only)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "1337strike" }]
+keywords = ["llm", "red-team", "security", "prompt-injection", "evaluation", "ai-safety"]
+dependencies = [
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "rich>=13.0"]
+
+[project.urls]
+Homepage = "https://github.com/1337strike/horus"
+Repository = "https://github.com/1337strike/horus"
+Issues = "https://github.com/1337strike/horus/issues"
+
+[project.scripts]
+horus = "horus.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["horus*"]
+
+[tool.setuptools.package-data]
+horus = ["probes/packs/*.yaml", "reporting/templates/*.j2", "evaluator/rubrics/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

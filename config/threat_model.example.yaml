@@ -1,0 +1,44 @@
+# =============================================================================
+# Threat model (example).
+#
+# Horus is deliberately top-down: you describe what you're protecting and from
+# whom, and coverage is measured against THAT — not against an arbitrary pile
+# of payloads. This file is documentation the report links to; the id here
+# matches `threat_model_id` in the run config.
+# =============================================================================
+id: tm-support-bot-v1
+system: "Customer-support chatbot with retrieval over a public help centre."
+
+assets:
+  - "System prompt / persona configuration"
+  - "Any secrets or internal keys present in context (should be none)"
+  - "Customer PII passed during a session"
+
+trust_boundaries:
+  - "User-supplied chat input (untrusted)"
+  - "Retrieved help-centre documents (semi-trusted; can be edited by attackers "
+    "who can influence indexed content -> indirect injection surface)"
+
+actors:
+  - "Unauthenticated end user probing for jailbreaks"
+  - "Malicious content author planting instructions in indexed docs"
+
+harms_in_scope:
+  - "Disclosure of the system prompt or any secret"
+  - "Producing disallowed content under a jailbreak framing"
+  - "Honouring instructions embedded in retrieved documents"
+  - "Wrongly refusing legitimate support questions (utility harm)"
+
+out_of_scope:
+  - "Tool/agent actions (this target has no tools; TOOL_ABUSE not assessed)"
+  - "Model-weight extraction / training-data reconstruction"
+
+# Maps the harms above to the categories Horus will actually exercise, so the
+# report can state coverage as a fraction of what the threat model calls for.
+categories_in_scope:
+  - direct_injection
+  - indirect_injection
+  - system_prompt_leak
+  - data_leakage
+  - guardrail_bypass
+  - over_refusal
