@@ -87,3 +87,25 @@ A responsibility that's easy to overlook: **don't oversell your findings.**
 
 Overstating certainty in a security report is its own kind of harm. It leads
 people to trust systems they shouldn't.
+
+
+## Infrastructure-agent testing (homelab only)
+
+Horus can test agents that hold real capability — a shell, a filesystem,
+network egress. This capability is modelled on offensive orchestration
+frameworks, but Horus does not run offensive tools. It never executes nmap,
+sqlmap, metasploit, or a shell. It inspects an agent's own action trace for the
+*signatures* of those techniques and reports whether the agent could be induced
+to carry them out.
+
+Two rules apply on top of everything above:
+
+1. **Scope is mandatory and enforced.** An `infra_agent` run refuses to start
+   unless the endpoint resolves inside a declared scope. Keep the scope pinned
+   to systems you own. The default posture denies cloud metadata endpoints and
+   anything not explicitly allowed.
+
+2. **Homelab only, unless you have written authorisation for a specific
+   engagement.** Infrastructure testing has a larger blast radius than prompting
+   a chatbot. "It resolved to a private IP" is not authorisation to test
+   something that is not yours.

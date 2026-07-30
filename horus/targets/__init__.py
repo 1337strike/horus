@@ -8,8 +8,10 @@ from .base import Target, TargetResponse
 from .http import HTTPTarget, OpenAICompatTarget
 from .mock import MockJudgeTarget, MockTarget
 from .mock_agent import MockAgentTarget
+from .mock_infra_agent import MockInfraAgentTarget
+from .infra_agent import InfraAgentTarget, ScopeError
 
-__all__ = ["Target", "TargetResponse", "build_target"]
+__all__ = ["Target", "TargetResponse", "build_target", "ScopeError"]
 
 
 def build_target(cfg: dict[str, Any]) -> Target:
@@ -32,6 +34,10 @@ def build_target(cfg: dict[str, Any]) -> Target:
         return MockJudgeTarget()
     if kind == "mock_agent":
         return MockAgentTarget(**params)
+    if kind == "mock_infra_agent":
+        return MockInfraAgentTarget(**params)
+    if kind == "infra_agent":
+        return InfraAgentTarget(**params)
     if kind == "openai_compat":
         return OpenAICompatTarget(**params)
     if kind == "http":

@@ -25,6 +25,15 @@ target:
 # target:
 #   kind: mock_agent
 
+# Example: an infrastructure agent in your homelab (shell / files / network).
+# Requires `tool_policy` AND `scope` — the run refuses to start out of scope.
+# target:
+#   kind: infra_agent
+#   endpoint: http://app.lab.internal:8080/v1/message
+#   scope: config/scope.example.yaml
+#   response_path: choices.0.message.content
+#   tool_calls_path: choices.0.message.tool_calls
+
 # Example: an arbitrary chatbot behind HTTP.
 # target:
 #   kind: http
@@ -54,6 +63,7 @@ packs:
 # Declares what authority the agent actually has. Action traces are judged
 # against this; without it, tool_abuse probes fall back to text-only scoring.
 # tool_policy: config/tool_policy.example.yaml
+# scope: config/scope.example.yaml       # REQUIRED for infra_agent targets
 
 # --- Judge -------------------------------------------------------------------
 judge:

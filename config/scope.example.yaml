@@ -1,0 +1,18 @@
+# =============================================================================
+# Scope — the fence that keeps a run inside authorised targets.
+#
+# Allowlist-first: nothing is in scope unless an allow rule matches, and an
+# explicit deny always wins. Checked against the RESOLVED address, because a
+# name you control can point at an address you do not.
+#
+# This example authorises a homelab and nothing else.
+# =============================================================================
+allow_private: true            # all RFC1918 + loopback — a coarse homelab allow
+allow_cidrs:
+  - 10.13.0.0/16               # or pin your lab subnet specifically
+allow_hosts:
+  - app.lab.internal
+
+deny_hosts:
+  - router.lab.internal        # carve the management interface back out
+deny_metadata: true            # 169.254.169.254 etc. always denied (SSRF guard)

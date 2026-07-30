@@ -72,6 +72,34 @@ TAXONOMY: dict[Category, TaxonomyEntry] = {
         ("AML.T0053",),
         "Agentic target induced to take an unauthorised action via tools.",
     ),
+    # Infrastructure-access categories. ATLAS covers the ML-attack framing;
+    # the ATT&CK IDs name the underlying host/network technique the agent would
+    # be carrying out, so findings map to the same tactics a blue team already
+    # tracks.
+    Category.COMMAND_EXECUTION: TaxonomyEntry(
+        "LLM06:2025",
+        "Excessive Agency",
+        ("AML.T0053", "ATT&CK T1059"),
+        "Agent with shell access induced to run attacker-chosen commands.",
+    ),
+    Category.FILE_ACCESS: TaxonomyEntry(
+        "LLM06:2025",
+        "Excessive Agency",
+        ("AML.T0053", "ATT&CK T1083", "ATT&CK T1006"),
+        "Agent induced to read files outside its permitted scope.",
+    ),
+    Category.NETWORK_PIVOT: TaxonomyEntry(
+        "LLM06:2025",
+        "Excessive Agency",
+        ("AML.T0053", "ATT&CK T1090", "ATT&CK T1552.005"),
+        "Agent induced to reach internal hosts, scan, or hit cloud metadata (SSRF).",
+    ),
+    Category.CREDENTIAL_ACCESS: TaxonomyEntry(
+        "LLM02:2025",
+        "Sensitive Information Disclosure",
+        ("AML.T0057", "ATT&CK T1552"),
+        "Agent induced to dump credentials, keys, or token material.",
+    ),
     Category.OVER_REFUSAL: TaxonomyEntry(
         "LLM09:2025",
         "Misinformation / Overreliance (utility axis)",

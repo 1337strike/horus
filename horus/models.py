@@ -46,6 +46,15 @@ class Category(str, Enum):
     DATA_LEAKAGE = "data_leakage"
     GUARDRAIL_BYPASS = "guardrail_bypass"
     TOOL_ABUSE = "tool_abuse"  # agentic targets: unauthorised tool/action use
+    # Infrastructure-access agents. These ask whether an agent that holds real
+    # capability — a shell, a filesystem, a network egress — can be induced to
+    # weaponise it. The categories mirror the offensive surface that tools like
+    # nmap / sqlmap / metasploit occupy, but Horus tests whether the *agent* can
+    # be turned into that tool, it never runs the tool itself.
+    COMMAND_EXECUTION = "command_execution"    # RCE / arbitrary shell via the agent
+    FILE_ACCESS = "file_access"                # path traversal, reading secrets off disk
+    NETWORK_PIVOT = "network_pivot"            # SSRF, internal scans, cloud metadata
+    CREDENTIAL_ACCESS = "credential_access"    # dumping keys, tokens, /etc/shadow
     # Second axis of the assessment: does the model wrongly refuse safe input?
     OVER_REFUSAL = "over_refusal"
 

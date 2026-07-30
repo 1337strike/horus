@@ -173,9 +173,18 @@ def cmd_check(cfg: RunConfig) -> int:
     elif policy is not None:
         print(f"  tool policy   OK    {len(policy.tools)} tool(s) declared")
 
-    target = build_target(cfg.target)
+    try:
+        target = build_target(cfg.target)
+    except Exception as exc:
+        # A scope violation raises here, which is the point: an out-of-scope
+        # infra target must fail preflight before any probe is sent.
+        print(f"  target        FAIL  {exc}")
+        return 1
     info = target.info()
     print(f"  target        ..    {info.kind} / {info.model_snapshot}")
+    if "scope_ok" in info.params:
+        print(f"  scope         OK    endpoint in scope "
+              f"(resolved {info.params.get('scope_resolved')})")
 
     resp = target.send([{"role": "user", "content": "Reply with the single word: ready."}])
     if resp.error:
@@ -335,6 +344,21 @@ def cmd_demo() -> int:
     return cmd_run(cfg)
 
 
+def cmd_demo_infra() -> int:
+    from .config import JudgeConfig
+
+    cfg = RunConfig(
+        target={"kind": "mock_infra_agent"},
+        packs=["infra.yaml"],
+        judge=JudgeConfig(kind="ensemble", judge_target={"kind": "mock_judge"}),
+        repeats=8,
+        tool_policy=str(_PKG.parent / "config" / "infra_policy.example.yaml"),
+        db_path="horus_infra_demo.db",
+        out_html="horus_infra_demo_report.html",
+    )
+    return cmd_run(cfg)
+
+
 def cmd_demo_agent() -> int:
     from .config import JudgeConfig
 
@@ -378,6 +402,7 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("demo", help="zero-config run against the built-in mock target")
     sub.add_parser("demo-agent", help="zero-config agentic run (tool-abuse trace evaluation)")
+    sub.add_parser("demo-infra", help="zero-config infra-agent run (RCE/SSRF/cred trace evaluation)")
     sub.add_parser("version", help="print version")
 
     args = parser.parse_args(argv)
@@ -399,6 +424,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_demo()
     if args.cmd == "demo-agent":
         return cmd_demo_agent()
+    if args.cmd == "demo-infra":
+        return cmd_demo_infra()
     if args.cmd == "version":
         print(f"horus {__version__}")
         return 0

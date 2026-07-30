@@ -32,6 +32,7 @@ class RunConfig:
     fail_on: str = ""          # CI gate: exit non-zero if a finding >= this severity
     threat_model_id: str = ""
     tool_policy: str = ""      # path to a tool policy YAML (agentic targets)
+    scope: str = ""            # path to a scope YAML (infra targets); enforced
     db_path: str = "horus.db"
     out_html: str = "horus_report.html"
 
@@ -54,6 +55,7 @@ class RunConfig:
             fail_on=data.get("fail_on", ""),
             threat_model_id=data.get("threat_model_id", ""),
             tool_policy=data.get("tool_policy", ""),
+            scope=data.get("scope", ""),
             db_path=data.get("db_path", "horus.db"),
             out_html=data.get("out_html", "horus_report.html"),
         )
