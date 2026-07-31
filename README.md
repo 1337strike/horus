@@ -701,16 +701,12 @@ The wedjat — the Eye of Horus — was an ancient Egyptian symbol of protection
 watchfulness, and it doubled as a system of measure. That pairing is the whole
 thesis of this project, so it seemed the right thing to put on the front.
 
-The mark is the wedjat alone, drawn in two weights: the contour carries the
-form, finer incised lines carry the detail, the way the originals were cut. A
-single weight is clean; a considered hierarchy is refined.
-
-It is placed by optical centre rather than bounding box. The eye's tail curls
-are visually lighter than the almond, so its weight sits about 21px above its
-geometric middle — align the boxes and the mark reads as sitting too low next to
-the type. Aligning the ink centroids instead puts both at exactly the same
-height. Precision and open space are doing the work here; there is no ornament
-to fall back on.
+The mark fuses the wedjat with a camera aperture: the Eye of Horus, its iris
+rebuilt as a nine-bladed diaphragm stopped down around a dark pupil, binary
+streaming along the brow and a calibration scale beneath the wordmark. It is the
+thesis in one image — an eye that measures, and measures its own sight. Drawn as
+SVG so it stays sharp at any size; the gold is a multi-stop gradient rather than
+a flat fill, because the banding is what makes gold read as metal.
 
 The palette is taken from the materials the original symbol was made from rather
 than from a default dark theme. The gold is a multi-stop gradient rather than a

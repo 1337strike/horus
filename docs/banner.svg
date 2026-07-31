@@ -1,101 +1,103 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="Horus — a calibrated red-team harness for LLM applications">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 384" width="1024" height="384" role="img" aria-label="Horus — a calibrated red-team harness for LLM applications">
   <defs>
-    <radialGradient id="ground" cx="0.28" cy="0.5" r="0.8">
-      <stop offset="0%"   stop-color="#102741"/>
-      <stop offset="45%"  stop-color="#081426"/>
-      <stop offset="100%" stop-color="#03060C"/>
-    </radialGradient>
-
-    <!-- A faint pool of light behind the mark. Depth, not decoration: it is
-         what stops a flat dark field reading as merely empty. -->
-    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0%"   stop-color="#E8C46A" stop-opacity="0.13"/>
-      <stop offset="60%"  stop-color="#C9962E" stop-opacity="0.04"/>
-      <stop offset="100%" stop-color="#C9962E" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Polished metal, not flat yellow: the banding is what reads as gold.
-         userSpaceOnUse is mandatory — an objectBoundingBox gradient silently
-         fails to render on any perfectly straight path (zero-area bbox). -->
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#132a4a"/><stop offset="55%" stop-color="#0b1c34"/>
+      <stop offset="100%" stop-color="#050d1a"/>
+    </linearGradient>
     <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="60" x2="0" y2="340">
-      <stop offset="0%"   stop-color="#9A7024"/>
-      <stop offset="22%"  stop-color="#F2D98A"/>
-      <stop offset="45%"  stop-color="#C9962E"/>
-      <stop offset="72%"  stop-color="#FFF3C8"/>
-      <stop offset="100%" stop-color="#8E661F"/>
+      <stop offset="0%" stop-color="#8E661F"/><stop offset="26%" stop-color="#F2D98A"/>
+      <stop offset="50%" stop-color="#C9962E"/><stop offset="74%" stop-color="#FFF3C8"/>
+      <stop offset="100%" stop-color="#9A7024"/>
     </linearGradient>
-
-    <linearGradient id="goldFaint" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1200" y2="0">
-      <stop offset="0%"   stop-color="#C9962E" stop-opacity="0.08"/>
-      <stop offset="50%"  stop-color="#F2D98A" stop-opacity="0.38"/>
-      <stop offset="100%" stop-color="#C9962E" stop-opacity="0.08"/>
+    <linearGradient id="goldWord" gradientUnits="userSpaceOnUse" x1="0" y1="92" x2="0" y2="182">
+      <stop offset="0%" stop-color="#F7E4A6"/><stop offset="48%" stop-color="#D9A63A"/>
+      <stop offset="52%" stop-color="#C9962E"/><stop offset="100%" stop-color="#7E5A1B"/>
     </linearGradient>
+    <linearGradient id="blade0" gradientUnits="userSpaceOnUse" x1="182" y1="140" x2="284" y2="238">
+      <stop offset="0%" stop-color="#F7E4A6"/><stop offset="100%" stop-color="#9A7024"/>
+    </linearGradient>
+    <linearGradient id="blade1" gradientUnits="userSpaceOnUse" x1="284" y1="140" x2="182" y2="238">
+      <stop offset="0%" stop-color="#D9A63A"/><stop offset="100%" stop-color="#6E4E18"/>
+    </linearGradient>
+    <radialGradient id="pupil" cx="0.5" cy="0.42" r="0.62">
+      <stop offset="0%" stop-color="#24486a"/><stop offset="55%" stop-color="#0d2138"/>
+      <stop offset="100%" stop-color="#03060c"/>
+    </radialGradient>
   </defs>
 
-  <rect width="1200" height="400" fill="url(#ground)"/>
-  <circle cx="290" cy="200" r="250" fill="url(#halo)"/>
+  <rect width="1024" height="384" fill="url(#ground)"/>
+  <g><text x="140" y="78" font-family="DejaVu Sans Mono,monospace" font-size="10" fill="#C9962E" opacity="0.80" letter-spacing="3">101000100001100</text>
+      <text x="150" y="93" font-family="DejaVu Sans Mono,monospace" font-size="10" fill="#C9962E" opacity="0.67" letter-spacing="3">010000100001</text>
+      <text x="160" y="108" font-family="DejaVu Sans Mono,monospace" font-size="10" fill="#C9962E" opacity="0.54" letter-spacing="3">100100010</text>
+      <text x="170" y="123" font-family="DejaVu Sans Mono,monospace" font-size="10" fill="#C9962E" opacity="0.41" letter-spacing="3">000111</text></g>
 
-  <!-- Double hairline. Restraint is the luxury cue; precision, not ornament. -->
-  <rect x="16" y="16" width="1168" height="368" fill="none"
-        stroke="url(#goldFaint)" stroke-width="1.2"/>
-  <rect x="22" y="22" width="1156" height="356" fill="none"
-        stroke="url(#goldFaint)" stroke-width="0.5" opacity="0.55"/>
-
-  <!-- ===================== The wedjat =====================
-       Two weights, deliberately: the contour carries the form, the finer
-       marks carry the detail. A single weight is clean; a considered
-       hierarchy is refined. -->
-  <g transform="translate(126,69) scale(1.32)" fill="none" stroke="url(#gold)"
-     stroke-linecap="round" stroke-linejoin="round">
-
-    <!-- brow -->
-    <path d="M26,40 C70,6 150,2 196,26" stroke-width="12.5"/>
-    <!-- fine line paralleling the brow: the incised band of Egyptian relief -->
-    <path d="M36,54 C74,26 144,22 186,42" stroke-width="3.4" opacity="0.7"/>
-
-    <!-- eye -->
-    <path d="M14,86 C56,44 148,42 200,72 C150,112 58,116 14,86 Z" stroke-width="12.5"/>
-    <circle cx="108" cy="78" r="19" fill="url(#gold)" stroke="none"/>
-    <!-- upper lid accent -->
-    <path d="M40,80 C70,58 130,56 172,70" stroke-width="3" opacity="0.5"/>
-
-    <!-- malar stripe and spiral tail -->
-    <path d="M84,106 L66,168" stroke-width="12.5"/>
-    <path d="M138,104 C154,140 178,150 166,172 C154,192 122,186 124,164"
-          stroke-width="12.5"/>
+  <!-- Wedjat: brow, almond (shallower bottom), malar, flowing tail clear of iris -->
+  <g fill="none" stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M112,138 C144,86 248,78 326,110 L368,140" stroke-width="15"/>
+    <path d="M356,110 L390,101" stroke-width="9"/>
+    <!-- almond: top full, bottom shallower & thinner -->
+    <path d="M150,192 C198,138 298,138 332,170" stroke-width="14"/>
+    <path d="M332,170 C300,214 200,220 150,192" stroke-width="12"/>
+    <path d="M224,226 L212,284" stroke-width="14"/>
+    <!-- spiral tail: drop straight, then a single clean coil, well left of iris -->
+    <path d="M158,214 C150,262 140,302 120,322 C98,344 68,328 80,306 C90,288 116,294 108,312 C104,320 94,318 96,310" stroke-width="14"/>
   </g>
 
-  <!-- ===================== Wordmark ===================== -->
-  <g transform="translate(494,110) scale(0.94)" fill="none" stroke="url(#gold)"
-     stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
-    <g><path d="M0,0 L0,104"/><path d="M70,0 L70,104"/><path d="M0,52 L70,52"/></g>
-    <g transform="translate(117,0)">
-      <path d="M0,30 C0,10 18,0 39,0 C60,0 78,10 78,30 L78,74
-               C78,94 60,104 39,104 C18,104 0,94 0,74 Z"/>
-    </g>
-    <g transform="translate(240,0)">
-      <path d="M0,0 L0,104"/>
-      <path d="M0,0 L44,0 C68,0 68,52 44,52 L0,52"/>
-      <path d="M40,52 L74,104"/>
-    </g>
-    <g transform="translate(356,0)">
-      <path d="M0,0 L0,70 C0,92 17,104 38,104 C59,104 76,92 76,70 L76,0"/>
-    </g>
-    <g transform="translate(473,0)">
-      <path d="M72,20 C64,6 44,-2 26,4 C4,12 0,38 22,48
-               C46,58 74,64 74,84 C74,100 52,110 32,104 C18,100 8,92 4,82"/>
-    </g>
+  <g>
+    <circle cx="232" cy="188" r="52" fill="#0a1626" stroke="url(#gold)" stroke-width="5"/>
+    <path d="M279.0,170.9 L249.9,194.5 L279.0,205.1 Z" fill="url(#blade0)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M279.0,205.1 L241.5,204.4 L257.0,231.3 Z" fill="url(#blade1)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M257.0,231.3 L228.7,206.7 L223.4,237.2 Z" fill="url(#blade0)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M223.4,237.2 L217.5,200.2 L193.7,220.2 Z" fill="url(#blade1)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M193.7,220.2 L213.0,188.0 L182.0,188.0 Z" fill="url(#blade0)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M182.0,188.0 L217.4,175.8 L193.7,155.9 Z" fill="url(#blade1)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M193.7,155.9 L228.7,169.3 L223.3,138.8 Z" fill="url(#blade0)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M223.3,138.8 L241.5,171.5 L257.0,144.7 Z" fill="url(#blade1)" stroke="#0a1420" stroke-width="0.8"/>
+      <path d="M257.0,144.7 L249.8,181.5 L279.0,170.9 Z" fill="url(#blade0)" stroke="#0a1420" stroke-width="0.8"/>
+    <circle cx="232" cy="188" r="19" fill="url(#pupil)"/>
+    <circle cx="232" cy="188" r="19" fill="none" stroke="#0a1420" stroke-width="2"/>
+    <circle cx="225" cy="181" r="5" fill="#9FC0E0" opacity="0.75"/>
   </g>
 
-  <g transform="translate(496,252)">
-    <path d="M0,0 L92,0" stroke="#C9962E" stroke-width="2.2" stroke-linecap="round"/>
-    <text x="0" y="42" font-family="DejaVu Sans, Helvetica, Arial, sans-serif"
-          font-size="19" letter-spacing="2.1" fill="#E8DFC8">
-      A calibrated red-team harness for LLM applications
-    </text>
-    <text x="0" y="76" font-family="DejaVu Sans Mono, monospace"
-          font-size="13.5" letter-spacing="3.6" fill="#6B8FC4">
-      THE EYE THAT MEASURES ITS OWN SIGHT
-    </text>
+  <text x="120" y="250" font-family="DejaVu Sans Mono,monospace" font-size="9"
+        fill="#C9962E" opacity="0.8">f/0.011</text>
+  <text x="322" y="250" font-family="DejaVu Sans Mono,monospace" font-size="9"
+        fill="#6B8FC4" opacity="0.8">κ 0.71</text>
+
+  <text x="508" y="174" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold"
+        font-size="110" letter-spacing="12" fill="url(#goldWord)">HORUS</text>
+
+  <g><line x1="486" y1="248" x2="486" y2="236" stroke="#C9962E" stroke-width="1.6" opacity="0.7"/>
+    <line x1="506" y1="248" x2="506" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="526" y1="248" x2="526" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="546" y1="248" x2="546" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="566" y1="248" x2="566" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="586" y1="248" x2="586" y2="236" stroke="#C9962E" stroke-width="1.6" opacity="0.7"/>
+    <line x1="606" y1="248" x2="606" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="626" y1="248" x2="626" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="646" y1="248" x2="646" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="666" y1="248" x2="666" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="686" y1="248" x2="686" y2="236" stroke="#C9962E" stroke-width="1.6" opacity="0.7"/>
+    <line x1="706" y1="248" x2="706" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="726" y1="248" x2="726" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="746" y1="248" x2="746" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="766" y1="248" x2="766" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="786" y1="248" x2="786" y2="236" stroke="#C9962E" stroke-width="1.6" opacity="0.7"/>
+    <line x1="806" y1="248" x2="806" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="826" y1="248" x2="826" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="846" y1="248" x2="846" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="866" y1="248" x2="866" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="886" y1="248" x2="886" y2="236" stroke="#C9962E" stroke-width="1.6" opacity="0.7"/>
+    <line x1="906" y1="248" x2="906" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="926" y1="248" x2="926" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="946" y1="248" x2="946" y2="242" stroke="#C9962E" stroke-width="1.0" opacity="0.7"/>
+    <line x1="486" y1="248" x2="946" y2="248" stroke="#C9962E" stroke-width="1.4" opacity="0.45"/>
   </g>
+
+  <text x="510" y="290" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold"
+        font-size="25" fill="#E8DFC8">A calibrated red-team harness</text>
+  <text x="510" y="320" font-family="DejaVu Sans,Arial,sans-serif" font-weight="bold"
+        font-size="25" fill="#E8DFC8">for LLM applications</text>
+  <text x="512" y="349" font-family="DejaVu Sans Mono,monospace"
+        font-size="13.5" letter-spacing="4" fill="#6B8FC4">THE EYE THAT MEASURES ITS OWN SIGHT</text>
 </svg>
