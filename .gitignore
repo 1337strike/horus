@@ -1,11 +1,25 @@
+# Python
 __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
 build/
 dist/
-.venv/
-venv/
+
+# Virtual environments (any name)
+.venv*/
+venv*/
+env/
+ENV/
+
+# Secrets & credentials — never commit these
+.env
+.env.*
+*.key
+*.pem
+*.token
+secrets.yaml
+credentials.*
 
 # Run artifacts hold adversarial content AND findings about a real system —
 # often someone else's. Never commit them. See RESPONSIBLE_USE.md.
@@ -15,4 +29,12 @@ venv/
 *report.html
 *.sarif
 findings.json
+
+# Local configs may contain endpoints, tokens, or lab scope — keep them local
 *.local.yaml
+config/local.yaml
+config/*.local.yaml
+
+# OS junk
+.DS_Store
+Thumbs.db
